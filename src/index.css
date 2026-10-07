@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --font-nunito: "Nunito", ui-rounded, system-ui, sans-serif;
+  --color-cream: #fff9ec;
+  --color-duo-green: #58cc02;
+  --color-duo-green-dark: #58a700;
+  --color-duo-blue: #1cb0f6;
+  --color-duo-blue-dark: #1899d6;
+  --color-duo-yellow: #ffc800;
+  --color-duo-yellow-dark: #e0a800;
+  --color-duo-purple: #ce82ff;
+  --color-duo-purple-dark: #a560ff;
+  --color-duo-red: #ff4b4b;
+  --color-duo-pink: #ff86d0;
+}
+
+body {
+  font-family: var(--font-nunito);
+  background-color: #fff9ec;
+  background-image: radial-gradient(#ffe9a8 1.5px, transparent 1.5px),
+    radial-gradient(#d6f4ff 1.5px, transparent 1.5px);
+  background-size: 42px 42px;
+  background-position: 0 0, 21px 21px;
+  color: #3c3c3c;
+  min-height: 100vh;
+}
+
+/* Animaciones suaves y cortas estilo juego educativo */
+@keyframes pop-in {
+  0% { opacity: 0; transform: translateY(14px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes bounce-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+@keyframes point-pop {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+@keyframes timer-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+.animate-pop-in { animation: pop-in 0.35s ease-out both; }
+.animate-bounce-soft { animation: bounce-soft 2.2s ease-in-out infinite; }
+.animate-point-pop { animation: point-pop 0.4s ease-out both; }
+.animate-wiggle { animation: wiggle 1.2s ease-in-out infinite; }
+.animate-timer-danger { animation: timer-shake 0.4s ease-in-out infinite; }
+
+/* Botones 3D tipo Duolingo sin copiar identidad */
+.btn-3d {
+  transition: transform 0.08s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-3d:hover { filter: brightness(1.05); transform: translateY(-1px); }
+.btn-3d:active { transform: translateY(3px); border-bottom-width: 0 !important; margin-top: 4px; }
