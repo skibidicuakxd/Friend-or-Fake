@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-nunito: "Nunito", ui-rounded, system-ui, sans-serif;
   --color-cream: #fff9ec;
@@ -24,6 +26,13 @@ body {
   background-position: 0 0, 21px 21px;
   color: #3c3c3c;
   min-height: 100vh;
+}
+
+.dark body {
+  background-color: #1a1a2e;
+  background-image: radial-gradient(#2a2a4a 1.5px, transparent 1.5px),
+    radial-gradient(#1e1e3a 1.5px, transparent 1.5px);
+  color: #e0e0e0;
 }
 
 /* Animaciones suaves y cortas estilo juego educativo */
