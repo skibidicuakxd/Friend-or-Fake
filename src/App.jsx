@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { isCorrectAnswer } from './lib/normalize.js'
+import { SECTIONS } from './data/questions.js'
+
+function shuffle(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
 
 // ---------- UI pequeñitos estilo juego ----------
 function Button({ children, onClick, color = 'green', className = '', disabled = false, type = 'button' }) {
@@ -71,7 +81,7 @@ function ScorePill({ label, points, color }) {
 }
 
 // ---------- Pantallas ----------
-function HomeScreen({ onStartFriends }) {
+function HomeScreen({ onStartFriends, onStartSchool }) {
   return (
     <div className="animate-pop-in mx-auto w-full max-w-2xl space-y-6">
       <Logo />
@@ -111,15 +121,18 @@ function HomeScreen({ onStartFriends }) {
               <div className="rounded-full bg-[#58cc02] px-4 py-2 text-sm font-black text-white">JUGAR ▶</div>
             </div>
           </button>
-          <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 p-4 opacity-70 dark:border-slate-600 dark:bg-slate-800/50">
+          <button
+            onClick={onStartSchool}
+            className="btn-3d rounded-2xl border-2 border-blue-200 bg-blue-50 p-4 text-left hover:bg-blue-100 dark:border-blue-800/50 dark:bg-blue-900/30 dark:hover:bg-blue-900/50"
+          >
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-lg font-black text-slate-600 dark:text-slate-300">🎒 Preguntas del cole</div>
-                <div className="text-sm font-bold text-slate-400 dark:text-slate-500">Escuela • Colegio • Bachillerato</div>
+                <div className="text-lg font-black text-slate-800 dark:text-slate-100">🎒 Preguntas del cole</div>
+                <div className="text-sm font-bold text-slate-500 dark:text-slate-400">Inicial • Colegio • Bachillerato • 180 preguntas</div>
               </div>
-              <div className="rounded-full bg-slate-200 px-4 py-2 text-sm font-black text-slate-500 dark:bg-slate-700 dark:text-slate-400">PRONTO 🔒</div>
+              <div className="rounded-full bg-[#1cb0f6] px-4 py-2 text-sm font-black text-white">JUGAR ▶</div>
             </div>
-          </div>
+          </button>
         </div>
         <div className="mt-4">
           <Button color="green" onClick={onStartFriends}>Empezar con amigos 🚀</Button>
@@ -473,6 +486,374 @@ function ResultsScreen({ p1, p2, scores, detail, suddenEnabled, suddenRounds, on
   )
 }
 
+// ---------- Modo Colegio ----------
+function SchoolConfigScreen({ onBack, onStart }) {
+  const [sectionId, setSectionId] = useState(null)
+  const [subjectName, setSubjectName] = useState(null)
+  const [qCount, setQCount] = useState(10)
+  const [timer, setTimer] = useState(20)
+  const [noLimit, setNoLimit] = useState(false)
+  const [mode, setMode] = useState('options') // 'options' | 'written'
+
+  const section = SECTIONS.find((s) => s.id === sectionId)
+  const subject = section?.subjects.find((s) => s.name === subjectName)
+  const maxQ = subject ? subject.questions.length : 60
+
+  const canStart = section && (qCount >= 1 && qCount <= maxQ)
+
+  const pickSection = (id) => {
+    setSectionId(id)
+    setSubjectName(null)
+    const sec = SECTIONS.find((s) => s.id === id)
+    const max = 60
+    setQCount((c) => Math.min(c, max))
+  }
+
+  const pickSubject = (name) => {
+    setSubjectName(name)
+    const sec = SECTIONS.find((s) => s.id === sectionId)
+    const sub = name ? sec.subjects.find((s) => s.name === name) : null
+    const max = sub ? sub.questions.length : 60
+    setQCount((c) => Math.min(c, max))
+  }
+
+  return (
+    <div className="animate-pop-in mx-auto w-full max-w-2xl space-y-5">
+      <div className="text-center">
+        <div className="text-5xl">🎒</div>
+        <h2 className="mt-2 text-3xl font-black text-slate-800 dark:text-slate-100">Preguntas del Cole</h2>
+        <p className="font-bold text-slate-500 dark:text-slate-400">Elige sección, materia y dificultad 📚</p>
+      </div>
+
+      <Card>
+        <h3 className="text-lg font-black text-slate-700 dark:text-slate-200">1️⃣ Sección</h3>
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          {SECTIONS.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => pickSection(s.id)}
+              className={`btn-3d rounded-2xl border-2 p-4 text-center ${
+                sectionId === s.id
+                  ? 'border-[#58cc02] bg-green-50 dark:border-[#58cc02] dark:bg-green-900/30'
+                  : 'border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700/50 dark:hover:bg-slate-700'
+              }`}
+            >
+              <div className="text-3xl">{s.emoji}</div>
+              <div className="mt-1 font-black text-slate-800 dark:text-slate-100">{s.name}</div>
+              <div className="text-xs font-bold text-slate-500 dark:text-slate-400">{s.level}</div>
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      {section && (
+        <Card>
+          <h3 className="text-lg font-black text-slate-700 dark:text-slate-200">2️⃣ Materia</h3>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <button
+              onClick={() => pickSubject(null)}
+              className={`btn-3d rounded-xl border-2 px-3 py-3 text-sm font-black ${
+                subjectName === null
+                  ? 'border-[#1cb0f6] bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                  : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300'
+              }`}
+            >
+              🎲 Todas
+            </button>
+            {section.subjects.map((sub) => (
+              <button
+                key={sub.name}
+                onClick={() => pickSubject(sub.name)}
+                className={`btn-3d rounded-xl border-2 px-3 py-3 text-sm font-black ${
+                  subjectName === sub.name
+                    ? 'border-[#1cb0f6] bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                }`}
+              >
+                {sub.emoji} {sub.name}
+              </button>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {section && (
+        <Card>
+          <h3 className="text-lg font-black text-slate-700 dark:text-slate-200">3️⃣ Cantidad de preguntas</h3>
+          <div className="mt-2 text-center">
+            <span className="text-3xl font-black text-[#58cc02]">{qCount}</span>
+            <span className="ml-2 font-bold text-slate-500 dark:text-slate-400">/ {maxQ} disponibles</span>
+          </div>
+          <input
+            type="range" min={1} max={maxQ} value={qCount}
+            onChange={(e) => setQCount(Number(e.target.value))}
+            className="mt-3 w-full accent-[#58cc02]"
+          />
+        </Card>
+      )}
+
+      {section && (
+        <Card>
+          <h3 className="text-lg font-black text-slate-700 dark:text-slate-200">4️⃣ Tiempo por pregunta</h3>
+          <div className="flex items-center justify-between gap-2">
+            <label className="font-black text-slate-700 dark:text-slate-200">
+              ⏱️ <span className="text-xl text-green-700 dark:text-green-400">{noLimit ? '∞' : `${timer}s`}</span>
+            </label>
+            <label className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-black text-slate-600 border dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600">
+              <input type="checkbox" checked={noLimit} onChange={(e) => setNoLimit(e.target.checked)} className="h-4 w-4 accent-green-600" />
+              Sin límite
+            </label>
+          </div>
+          {!noLimit && (
+            <input type="range" min={5} max={60} step={5} value={timer} onChange={(e) => setTimer(Number(e.target.value))} className="mt-3 w-full accent-green-600" />
+          )}
+        </Card>
+      )}
+
+      {section && (
+        <Card>
+          <h3 className="text-lg font-black text-slate-700 dark:text-slate-200">5️⃣ Tipo de respuesta</h3>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <button
+              onClick={() => setMode('options')}
+              className={`btn-3d rounded-2xl border-2 p-4 text-center ${
+                mode === 'options'
+                  ? 'border-[#58cc02] bg-green-50 dark:bg-green-900/30'
+                  : 'border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-700/50'
+              }`}
+            >
+              <div className="text-3xl">🔘</div>
+              <div className="mt-1 font-black text-slate-800 dark:text-slate-100">Opción múltiple</div>
+              <div className="text-xs font-bold text-slate-500 dark:text-slate-400">Elige A, B o C</div>
+            </button>
+            <button
+              onClick={() => setMode('written')}
+              className={`btn-3d rounded-2xl border-2 p-4 text-center ${
+                mode === 'written'
+                  ? 'border-[#58cc02] bg-green-50 dark:bg-green-900/30'
+                  : 'border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-700/50'
+              }`}
+            >
+              <div className="text-3xl">✍️</div>
+              <div className="mt-1 font-black text-slate-800 dark:text-slate-100">Escribir</div>
+              <div className="text-xs font-bold text-slate-500 dark:text-slate-400">Como modo amigos</div>
+            </button>
+          </div>
+        </Card>
+      )}
+
+      <div className="grid gap-3">
+        <Button
+          color="green"
+          disabled={!canStart}
+          onClick={() => onStart({ sectionId, subjectName, qCount, timer, noLimit, mode })}
+        >
+          ¡Empezar! 🚀
+        </Button>
+        <Button color="white" onClick={onBack}>← Volver</Button>
+        {!section && <p className="text-center text-sm font-bold text-slate-400">Selecciona una sección para continuar 👆</p>}
+      </div>
+    </div>
+  )
+}
+
+function SchoolQuizScreen({ question, qNumber, qTotal, timerSeconds, noLimit, mode, onAnswer }) {
+  const [selected, setSelected] = useState(null)
+  const [guess, setGuess] = useState('')
+  const [left, setLeft] = useState(timerSeconds)
+  const [feedback, setFeedback] = useState(null)
+  const total = timerSeconds
+
+  useEffect(() => {
+    setSelected(null)
+    setGuess('')
+    setFeedback(null)
+    setLeft(timerSeconds)
+  }, [qNumber, timerSeconds])
+
+  useEffect(() => {
+    if (noLimit || feedback) return
+    if (left <= 0) {
+      setFeedback({ isCorrect: false, correctIdx: question.answer, timedOut: true, guessVal: mode === 'written' ? guess : '' })
+      return
+    }
+    const t = setTimeout(() => setLeft((s) => s - 1), 1000)
+    return () => clearTimeout(t)
+  }, [left, noLimit, feedback, question, guess, mode])
+
+  const optionClick = (idx) => {
+    if (feedback) return
+    setSelected(idx)
+    setFeedback({ isCorrect: idx === question.answer, correctIdx: question.answer, timedOut: false, guessVal: question.options[idx] })
+  }
+
+  const submitWritten = () => {
+    if (feedback || !guess.trim()) return
+    const ok = isCorrectAnswer(guess, question.options[question.answer])
+    setFeedback({ isCorrect: ok, correctIdx: question.answer, timedOut: false, guessVal: guess.trim() })
+  }
+
+  const pct = noLimit ? 100 : Math.max(0, (left / total) * 100)
+  const danger = !noLimit && left <= 5 && !feedback
+  const optLetters = ['A', 'B', 'C']
+  const optColors = ['border-sky-300 bg-sky-50 text-sky-700 dark:border-sky-700 dark:bg-sky-900/30 dark:text-sky-300',
+    'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+    'border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-700 dark:bg-purple-900/30 dark:text-purple-300']
+
+  return (
+    <div className="animate-pop-in mx-auto w-full max-w-2xl space-y-5">
+      <div className="text-center">
+        <div className="inline-flex items-center gap-2 rounded-full bg-slate-800 px-4 py-1.5 text-sm font-black text-white dark:bg-slate-700">
+          🎓 Pregunta {qNumber}/{qTotal}
+        </div>
+        <div className="mt-2 flex items-center justify-center gap-2">
+          <div className="flex gap-1.5">
+            {Array.from({ length: Math.min(qTotal, 15) }).map((_, i) => (
+              <div key={i} className={`h-2 w-2 rounded-full ${i < qNumber - 1 ? 'bg-green-400' : i === qNumber - 1 ? 'bg-amber-400' : 'bg-slate-200 dark:bg-slate-600'}`} />
+            ))}
+            {qTotal > 15 && <span className="text-xs font-black text-slate-400">+{qTotal - 15}</span>}
+          </div>
+        </div>
+      </div>
+
+      {!noLimit && !feedback && (
+        <div className={`rounded-2xl border-2 bg-white p-3 dark:bg-slate-800 ${danger ? 'border-red-200 animate-timer-danger' : 'border-slate-100 dark:border-slate-700'}`}>
+          <div className="flex items-center justify-between text-sm font-black">
+            <span>⏱️ {left}s</span>
+            <span className={danger ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}>{danger ? '¡Corre! 🏃' : 'Tú puedes 💪'}</span>
+          </div>
+          <div className="mt-2 h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${left <= 5 ? 'bg-red-400' : left <= 10 ? 'bg-amber-400' : 'bg-green-400'}`}
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      <Card>
+        <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-slate-100 p-5 text-center dark:from-blue-900/30 dark:to-purple-900/30 dark:border-slate-700">
+          <div className="mt-1 text-xl font-black text-slate-800 sm:text-2xl dark:text-slate-100">"{question.text}"</div>
+        </div>
+
+        {mode === 'options' && !feedback && (
+          <div className="mt-4 grid gap-3">
+            {question.options.map((opt, idx) => (
+              <button
+                key={idx}
+                onClick={() => optionClick(idx)}
+                className={`btn-3d rounded-2xl border-2 border-b-4 px-4 py-4 text-left font-bold ${optColors[idx]}`}
+              >
+                <span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/60 text-sm font-black shadow-sm dark:bg-black/20">{optLetters[idx]}</span>
+                {opt}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {mode === 'written' && !feedback && (
+          <div className="mt-4">
+            <label className="font-black text-slate-700 dark:text-slate-200">Tu respuesta ✏️</label>
+            <input
+              value={guess}
+              onChange={(e) => setGuess(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') submitWritten() }}
+              placeholder="Escribe tu respuesta..."
+              maxLength={80}
+              autoFocus
+              className="mt-2 w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-lg font-bold outline-none focus:border-green-400 focus:bg-white dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400 dark:focus:bg-slate-600"
+            />
+            <div className="mt-3">
+              <Button color="green" disabled={!guess.trim()} onClick={submitWritten}>Responder ✅</Button>
+            </div>
+          </div>
+        )}
+
+        {feedback && (
+          <div className={`animate-pop-in mt-4 rounded-2xl border-2 p-5 text-center ${feedback.isCorrect ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/30' : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/30'}`}>
+            {feedback.timedOut ? (
+              <>
+                <div className="text-5xl">⏰</div>
+                <div className="mt-2 text-2xl font-black text-slate-800 dark:text-slate-100">¡Tiempo agotado!</div>
+                <div className="font-bold text-slate-500 dark:text-slate-400">0 puntos. Era: <b className="text-slate-800 dark:text-slate-100">{question.options[question.answer]}</b></div>
+              </>
+            ) : feedback.isCorrect ? (
+              <>
+                <div className="animate-point-pop text-5xl">🎉</div>
+                <div className="mt-2 text-2xl font-black text-green-700 dark:text-green-400">¡Correcto! +1 punto ✨</div>
+              </>
+            ) : (
+              <>
+                <div className="text-5xl">😅</div>
+                <div className="mt-2 text-2xl font-black text-slate-800 dark:text-slate-100">La respuesta era: {question.options[question.answer]}</div>
+                {mode === 'written' && <div className="font-bold text-slate-500 dark:text-slate-400">Dijiste: "{feedback.guessVal}"</div>}
+                {mode === 'options' && <div className="font-bold text-slate-500 dark:text-slate-400">Elegiste: {optLetters[feedback.correctIdx]} — era {optLetters[question.answer]}</div>}
+              </>
+            )}
+            <div className="mt-4">
+              <Button color={feedback.isCorrect ? 'green' : 'blue'} onClick={() => onAnswer(feedback)}>
+                {qNumber === qTotal ? 'Ver resultado 🏆' : 'Siguiente 👉'}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Card>
+    </div>
+  )
+}
+
+function SchoolResultsScreen({ score, total, detail, sectionName, subjectName, mode, onReplay, onHome }) {
+  const pct = total > 0 ? Math.round((score / total) * 100) : 0
+  const emoji = pct >= 90 ? '🌟' : pct >= 70 ? '🏆' : pct >= 50 ? '💪' : '📚'
+  const msg = pct >= 90 ? '¡Eres un genio!' : pct >= 70 ? '¡Muy bien!' : pct >= 50 ? '¡Sigue practicando!' : '¡No te rindas!'
+
+  return (
+    <div className="animate-pop-in mx-auto w-full max-w-2xl space-y-5">
+      <div className="text-center">
+        <div className="text-6xl">{emoji}</div>
+        <h2 className="mt-2 text-4xl font-black text-slate-800 dark:text-slate-100">{msg}</h2>
+        <p className="font-bold text-slate-500 dark:text-slate-400">{sectionName} • {subjectName} • {mode === 'options' ? 'Opción múltiple' : 'Escribir'}</p>
+      </div>
+
+      <Card>
+        <div className="text-center">
+          <div className="text-6xl font-black text-[#58cc02]">{score}/{total}</div>
+          <div className="mt-1 text-xl font-black text-slate-600 dark:text-slate-300">{pct}% correcto</div>
+        </div>
+        <div className="mt-4 h-4 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+          <div
+            className={`h-full rounded-full transition-all ${pct >= 70 ? 'bg-[#58cc02]' : pct >= 50 ? 'bg-[#ffc800]' : 'bg-[#ff4b4b]'}`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <div className="mt-5 grid gap-2 sm:grid-cols-2">
+          <Button color="green" onClick={onReplay}>🔄 Otra vez</Button>
+          <Button color="white" onClick={onHome}>🏠 Inicio</Button>
+        </div>
+      </Card>
+
+      <Card>
+        <h3 className="text-lg font-black text-slate-700 dark:text-slate-200">🧾 Revisión</h3>
+        <div className="mt-3 space-y-2">
+          {detail.map((d, i) => (
+            <div key={i} className={`rounded-2xl border-2 p-3 ${d.isCorrect ? 'border-green-100 bg-green-50 dark:border-green-800/50 dark:bg-green-900/20' : 'border-red-100 bg-red-50 dark:border-red-800/50 dark:bg-red-900/20'}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="font-extrabold text-slate-700 dark:text-slate-200">{i + 1}. {d.questionText}</div>
+                <div className="text-xl">{d.isCorrect ? '✅' : d.timedOut ? '⏰' : '❌'}</div>
+              </div>
+              {!d.isCorrect && (
+                <div className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                  Tu respuesta: "{d.guessVal || '—'}" • Correcta: "{d.correctAnswer}"
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  )
+}
+
 // ---------- App principal ----------
 export default function App() {
   const [phase, setPhase] = useState('home')
@@ -488,6 +869,12 @@ export default function App() {
   const [suddenDrafts, setSuddenDrafts] = useState([])
   const [suddenCreateIdx, setSuddenCreateIdx] = useState(0)
   const [suddenRounds, setSuddenRounds] = useState(0)
+
+  const [schoolConfig, setSchoolConfig] = useState(null)
+  const [schoolQuestions, setSchoolQuestions] = useState([])
+  const [schoolIdx, setSchoolIdx] = useState(0)
+  const [schoolScore, setSchoolScore] = useState(0)
+  const [schoolDetail, setSchoolDetail] = useState([])
 
   const totalToCreate = useMemo(() => config.rounds * 2, [config.rounds])
 
@@ -574,6 +961,44 @@ export default function App() {
     setPhase('sudden-create')
   }
 
+  // ----- Modo Colegio -----
+  const startSchoolSetup = () => setPhase('school-config')
+
+  const startSchoolQuiz = (cfg) => {
+    const section = SECTIONS.find((s) => s.id === cfg.sectionId)
+    let pool = []
+    if (cfg.subjectName) {
+      const sub = section.subjects.find((s) => s.name === cfg.subjectName)
+      pool = [...sub.questions]
+    } else {
+      pool = section.subjects.flatMap((s) => s.questions)
+    }
+    const picked = shuffle(pool).slice(0, cfg.qCount)
+    setSchoolConfig(cfg)
+    setSchoolQuestions(picked)
+    setSchoolIdx(0)
+    setSchoolScore(0)
+    setSchoolDetail([])
+    setPhase('school-quiz')
+  }
+
+  const handleSchoolAnswer = (fb) => {
+    const q = schoolQuestions[schoolIdx]
+    if (fb.isCorrect) setSchoolScore((s) => s + 1)
+    setSchoolDetail((d) => [...d, {
+      questionText: q.text,
+      guessVal: fb.guessVal,
+      correctAnswer: q.options[q.answer],
+      isCorrect: fb.isCorrect,
+      timedOut: fb.timedOut,
+    }])
+    if (schoolIdx + 1 >= schoolQuestions.length) {
+      setPhase('school-results')
+    } else {
+      setSchoolIdx(schoolIdx + 1)
+    }
+  }
+
   return (
     <div className="min-h-screen px-4 py-8 sm:py-12 relative">
       {/* Toggle modo oscuro/claro */}
@@ -588,17 +1013,29 @@ export default function App() {
       <div className="mx-auto max-w-3xl">
         {phase !== 'home' && (
           <div className="mb-5 flex items-center justify-center gap-2 text-sm font-black text-slate-400 dark:text-slate-500">
-            <span className={phase === 'setup' ? 'text-slate-800 dark:text-slate-100' : ''}>⚙️ Config</span>
-            <span>›</span>
-            <span className={phase === 'create' || phase === 'sudden-create' ? 'text-slate-800 dark:text-slate-100' : ''}>✍️ Preguntas</span>
-            <span>›</span>
-            <span className={phase === 'answer' ? 'text-slate-800 dark:text-slate-100' : ''}>🤔 Respuestas</span>
-            <span>›</span>
-            <span className={phase === 'results' ? 'text-slate-800 dark:text-slate-100' : ''}>🏆 Resultados</span>
+            {phase.startsWith('school') ? (
+              <>
+                <span className={phase === 'school-config' ? 'text-slate-800 dark:text-slate-100' : ''}>⚙️ Config</span>
+                <span>›</span>
+                <span className={phase === 'school-quiz' ? 'text-slate-800 dark:text-slate-100' : ''}>🎓 Respondiendo</span>
+                <span>›</span>
+                <span className={phase === 'school-results' ? 'text-slate-800 dark:text-slate-100' : ''}>🏆 Resultado</span>
+              </>
+            ) : (
+              <>
+                <span className={phase === 'setup' ? 'text-slate-800 dark:text-slate-100' : ''}>⚙️ Config</span>
+                <span>›</span>
+                <span className={phase === 'create' || phase === 'sudden-create' ? 'text-slate-800 dark:text-slate-100' : ''}>✍️ Preguntas</span>
+                <span>›</span>
+                <span className={phase === 'answer' ? 'text-slate-800 dark:text-slate-100' : ''}>🤔 Respuestas</span>
+                <span>›</span>
+                <span className={phase === 'results' ? 'text-slate-800 dark:text-slate-100' : ''}>🏆 Resultados</span>
+              </>
+            )}
           </div>
         )}
 
-        {phase === 'home' && <HomeScreen onStartFriends={startFriendsSetup} />}
+        {phase === 'home' && <HomeScreen onStartFriends={startFriendsSetup} onStartSchool={startSchoolSetup} />}
 
         {phase === 'setup' && (
           <SetupScreen initial={config} onBack={() => setPhase('home')} onStart={startCreating} />
@@ -656,6 +1093,36 @@ export default function App() {
             onSuddenDeath={startSuddenDeath}
             onReplay={() => { resetGame(); setPhase('setup') }}
             onHome={() => { resetGame(); setPhase('home') }}
+          />
+        )}
+
+        {phase === 'school-config' && (
+          <SchoolConfigScreen onBack={() => setPhase('home')} onStart={startSchoolQuiz} />
+        )}
+
+        {phase === 'school-quiz' && schoolQuestions[schoolIdx] && (
+          <SchoolQuizScreen
+            key={schoolIdx}
+            question={schoolQuestions[schoolIdx]}
+            qNumber={schoolIdx + 1}
+            qTotal={schoolQuestions.length}
+            timerSeconds={schoolConfig.timer}
+            noLimit={schoolConfig.noLimit}
+            mode={schoolConfig.mode}
+            onAnswer={handleSchoolAnswer}
+          />
+        )}
+
+        {phase === 'school-results' && (
+          <SchoolResultsScreen
+            score={schoolScore}
+            total={schoolQuestions.length}
+            detail={schoolDetail}
+            sectionName={SECTIONS.find((s) => s.id === schoolConfig.sectionId)?.name}
+            subjectName={schoolConfig.subjectName || 'Todas las materias'}
+            mode={schoolConfig.mode}
+            onReplay={() => setPhase('school-config')}
+            onHome={() => setPhase('home')}
           />
         )}
 
