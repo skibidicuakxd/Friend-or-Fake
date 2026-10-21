@@ -11,134 +11,174 @@ function shuffle(arr) {
   return a
 }
 
-// ---------- UI pequeñitos estilo juego ----------
-function Button({ children, onClick, color = 'green', className = '', disabled = false, type = 'button' }) {
-  const colors = {
-    green: 'bg-[#58cc02] border-[#58a700] text-white',
-    blue: 'bg-[#1cb0f6] border-[#1899d6] text-white',
-    yellow: 'bg-[#ffc800] border-[#e0a800] text-[#4b4b00]',
-    purple: 'bg-[#ce82ff] border-[#a560ff] text-white',
-    pink: 'bg-[#ff86d0] border-[#e068af] text-white',
-    white: 'bg-white border-slate-200 text-slate-700 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200',
-    red: 'bg-[#ff4b4b] border-[#d33131] text-white',
-    dark: 'bg-slate-800 border-slate-950 text-white',
+// ---------- Primitivos UI ----------
+function Button({ children, onClick, variant = 'primary', className = '', disabled = false, type = 'button' }) {
+  const styles = {
+    primary: 'text-white',
+    secondary: 'border',
+    ghost: '',
+    coral: 'text-white',
   }
+  const colors = {
+    primary: { background: 'var(--teal)', border: 'var(--teal-deep)' },
+    secondary: { background: 'transparent', border: 'var(--line)' },
+    ghost: { background: 'transparent', border: 'transparent' },
+    coral: { background: 'var(--coral)', border: 'var(--coral-deep)' },
+  }
+  const c = colors[variant] || colors.primary
   return (
     <button
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className={`btn-3d w-full rounded-2xl border-b-4 px-6 py-4 text-lg font-extrabold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed ${colors[color]} ${className}`}
+      className={`group relative w-full rounded-xl px-6 py-3.5 text-base font-bold tracking-wide transition-soft disabled:opacity-40 disabled:cursor-not-allowed ${styles[variant] || ''} ${className}`}
+      style={{
+        background: c.background,
+        border: `2px solid ${c.border}`,
+        borderBottomWidth: variant === 'ghost' ? '1px' : '3px',
+        ...(variant === 'primary' || variant === 'coral' ? { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : {}),
+      }}
     >
       {children}
     </button>
   )
 }
 
-function Card({ children, className = '' }) {
+function Panel({ children, className = '', accent = false }) {
   return (
-    <div className={`rounded-3xl border-2 border-slate-100 bg-white p-6 shadow-[0_8px_24px_rgba(0,0,0,0.06)] sm:p-8 dark:border-slate-700 dark:bg-slate-800 dark:shadow-[0_8px_24px_rgba(0,0,0,0.3)] ${className}`}>
+    <div
+      className={`rounded-2xl p-6 sm:p-7 ${className}`}
+      style={{
+        background: 'var(--card)',
+        border: accent ? '2px solid var(--line)' : '1px solid var(--line)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+      }}
+    >
       {children}
     </div>
   )
 }
 
-function PlayerBadge({ who, name }) {
+function PlayerTag({ who, name }) {
   const isP1 = who === 'p1'
+  const bg = isP1 ? 'var(--teal)' : 'var(--coral)'
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-extrabold text-white shadow-sm ${
-        isP1 ? 'bg-[#1cb0f6]' : 'bg-[#a560ff]'
-      }`}
+      className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-bold text-white"
+      style={{ background: bg }}
     >
-      <span className="text-base">{isP1 ? '🔵' : '🟣'}</span> {name}
+      {isP1 ? '●' : '●'} {name}
     </span>
   )
 }
 
-function Logo() {
+function SectionTitle({ children, className = '' }) {
   return (
-    <div className="text-center">
-      <div className="animate-bounce-soft mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-3xl bg-white text-5xl shadow-[0_8px_20px_rgba(0,0,0,0.08)] border-2 border-amber-100 dark:bg-slate-800 dark:border-slate-700">
-        🎭
-      </div>
-      <h1 className="text-4xl font-black tracking-tight text-slate-800 sm:text-5xl dark:text-slate-100">
-        Friend <span className="text-[#1cb0f6]">or</span> <span className="text-[#a560ff]">Fake</span>
-      </h1>
-      <p className="mt-2 text-lg font-bold text-slate-500 dark:text-slate-400">¿Realmente se conocen? 😏</p>
-    </div>
+    <h2 className={`text-[1.35rem] font-extrabold leading-tight tracking-tight ${className}`} style={{ color: 'var(--ink)' }}>
+      {children}
+    </h2>
   )
 }
 
-function ScorePill({ label, points, color }) {
+function Eyebrow({ children }) {
   return (
-    <div className={`flex-1 rounded-2xl border-2 p-4 text-center ${color}`}>
-      <div className="text-sm font-extrabold uppercase opacity-70">{label}</div>
-      <div className="animate-point-pop text-4xl font-black">{points}</div>
-      <div className="text-sm font-bold">pts ✨</div>
-    </div>
+    <span className="block text-[0.7rem] font-extrabold uppercase tracking-[0.15em]" style={{ color: 'var(--ink-faint)' }}>
+      {children}
+    </span>
   )
 }
 
 // ---------- Pantallas ----------
 function HomeScreen({ onStartFriends, onStartSchool }) {
   return (
-    <div className="animate-pop-in mx-auto w-full max-w-2xl space-y-6">
-      <Logo />
-      <Card>
-        <h2 className="mb-4 text-center text-2xl font-black text-slate-800 dark:text-slate-100">¿Cómo se juega? 🎮</h2>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl bg-blue-50 border-2 border-blue-100 p-4 text-center dark:bg-blue-900/30 dark:border-blue-800/50">
-            <div className="text-3xl">✍️</div>
-            <div className="mt-1 font-black text-slate-700 dark:text-slate-200">1. Preguntan</div>
-            <div className="text-sm font-semibold text-slate-500 dark:text-slate-400">Cada uno crea sus preguntas secretas</div>
-          </div>
-          <div className="rounded-2xl bg-purple-50 border-2 border-purple-100 p-4 text-center dark:bg-purple-900/30 dark:border-purple-800/50">
-            <div className="text-3xl">🤔</div>
-            <div className="mt-1 font-black text-slate-700 dark:text-slate-200">2. Adivinan</div>
-            <div className="text-sm font-semibold text-slate-500 dark:text-slate-400">Responden contra el reloj ⏱️</div>
-          </div>
-          <div className="rounded-2xl bg-amber-50 border-2 border-amber-100 p-4 text-center dark:bg-amber-900/30 dark:border-amber-800/50">
-            <div className="text-3xl">🏆</div>
-            <div className="mt-1 font-black text-slate-700 dark:text-slate-200">3. Ganan</div>
-            <div className="text-sm font-semibold text-slate-500 dark:text-slate-400">1 punto por acierto. ¡Tabla final!</div>
-          </div>
-        </div>
-      </Card>
+    <div className="animate-fade-up mx-auto w-full max-w-lg space-y-10 lg:grid lg:max-w-4xl lg:grid-cols-2 lg:items-center lg:gap-12 lg:space-y-0">
+      {/* Logo: más personal, menos genérico */}
+      <div className="text-center pt-4 lg:text-left">
+        <div className="animate-gentle-bounce inline-block mb-5 text-5xl select-none">🎭</div>
+        <h1 className="text-[2.6rem] sm:text-[3.4rem] font-extrabold leading-[1.05] tracking-tight" style={{ color: 'var(--ink)' }}>
+          Friend<br />
+          <span style={{ color: 'var(--teal)' }}>or</span>{' '}
+          <span style={{ color: 'var(--coral)' }}>Fake</span>
+        </h1>
+        <p className="mt-3 text-base font-semibold" style={{ color: 'var(--ink-soft)' }}>
+          ¿Realmente se conocen?
+        </p>
+        <p className="mt-8 hidden text-sm font-semibold lg:block" style={{ color: 'var(--ink-faint)' }}>
+          Pásense el teléfono. No miren las respuestas. 🙈
+        </p>
+      </div>
 
-      <Card className="!bg-gradient-to-br !from-white !to-amber-50 dark:!from-slate-800 dark:!to-slate-900">
-        <h2 className="mb-3 text-center text-2xl font-black text-slate-800 dark:text-slate-100">Elige el modo ✨</h2>
-        <div className="grid gap-3">
-          <button
-            onClick={onStartFriends}
-            className="btn-3d rounded-2xl border-2 border-green-200 bg-green-50 p-4 text-left hover:bg-green-100 dark:border-green-800/50 dark:bg-green-900/30 dark:hover:bg-green-900/50"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-lg font-black text-slate-800 dark:text-slate-100">👯 Modo Amigos</div>
-                <div className="text-sm font-bold text-slate-500 dark:text-slate-400">Se preguntan entre sí • ¡Disponible ahora!</div>
+      {/* Modos: más peso visual, sin tarjetas genéricas */}
+      <div className="space-y-3">
+        <Eyebrow>Elige cómo jugar</Eyebrow>
+        <button
+          onClick={onStartFriends}
+          className="group w-full rounded-2xl p-5 text-left transition-soft hover:translate-y-[-1px]"
+          style={{ background: 'var(--teal-soft)', border: '2px solid var(--teal)', borderBottomWidth: '4px' }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xl font-extrabold" style={{ color: 'var(--ink)' }}>👯 Modo Amigos</div>
+              <div className="mt-0.5 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
+                Se preguntan entre sí y adivinan
               </div>
-              <div className="rounded-full bg-[#58cc02] px-4 py-2 text-sm font-black text-white">JUGAR ▶</div>
             </div>
-          </button>
-          <button
-            onClick={onStartSchool}
-            className="btn-3d rounded-2xl border-2 border-blue-200 bg-blue-50 p-4 text-left hover:bg-blue-100 dark:border-blue-800/50 dark:bg-blue-900/30 dark:hover:bg-blue-900/50"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-lg font-black text-slate-800 dark:text-slate-100">🎒 Preguntas del cole</div>
-                <div className="text-sm font-bold text-slate-500 dark:text-slate-400">Inicial • Colegio • Bachillerato • 180 preguntas</div>
+            <span
+              className="shrink-0 rounded-full px-4 py-2 text-sm font-extrabold text-white transition-soft group-hover:scale-105"
+              style={{ background: 'var(--teal)' }}
+            >
+              Jugar →
+            </span>
+          </div>
+        </button>
+
+        <button
+          onClick={onStartSchool}
+          className="group w-full rounded-2xl p-5 text-left transition-soft hover:translate-y-[-1px]"
+          style={{ background: 'var(--coral-soft)', border: '2px solid var(--coral)', borderBottomWidth: '4px' }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xl font-extrabold" style={{ color: 'var(--ink)' }}>🎒 Preguntas del cole</div>
+              <div className="mt-0.5 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
+                180 preguntas • 3 niveles • 4 materias
               </div>
-              <div className="rounded-full bg-[#1cb0f6] px-4 py-2 text-sm font-black text-white">JUGAR ▶</div>
             </div>
-          </button>
-        </div>
-        <div className="mt-4">
-          <Button color="green" onClick={onStartFriends}>Empezar con amigos 🚀</Button>
-        </div>
-      </Card>
-      <p className="text-center text-sm font-bold text-slate-400 dark:text-slate-500">Tip: pásense el teléfono 📱 ¡No miren las respuestas secretas! 🙈</p>
+            <span
+              className="shrink-0 rounded-full px-4 py-2 text-sm font-extrabold text-white transition-soft group-hover:scale-105"
+              style={{ background: 'var(--coral)' }}
+            >
+              Jugar →
+            </span>
+          </div>
+        </button>
+      </div>
+
+      {/* Cómo se juega: más sutil, sin tarjetas */}
+      <div style={{ borderTop: '1px solid var(--line)' }} className="pt-6 lg:col-span-2 lg:mt-4">
+        <Eyebrow>Cómo funciona</Eyebrow>
+        <ol className="mt-3 space-y-3">
+          {[
+            { icon: '✍️', title: 'Preguntan', desc: 'Cada uno escribe sus preguntas secretas' },
+            { icon: '🤔', title: 'Adivinan', desc: 'Responden contra el reloj' },
+            { icon: '🏆', title: 'Comparan', desc: '1 punto por acierto. Gana quien más sepa' },
+          ].map((step, i) => (
+            <li key={i} className="flex items-start gap-3.5">
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-extrabold" style={{ background: 'var(--gold-soft)', color: 'var(--gold)' }}>
+                {i + 1}
+              </span>
+              <div>
+                <span className="font-extrabold" style={{ color: 'var(--ink)' }}>{step.icon} {step.title}</span>
+                <span className="ml-1.5 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>{step.desc}</span>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <p className="text-center text-xs font-semibold pb-4 lg:hidden" style={{ color: 'var(--ink-faint)' }}>
+        Pásense el teléfono. No miren las respuestas. 🙈
+      </p>
     </div>
   )
 }
@@ -154,84 +194,119 @@ function SetupScreen({ initial, onBack, onStart }) {
   const canStart = p1.trim().length > 0 && p2.trim().length > 0
 
   return (
-    <div className="animate-pop-in mx-auto w-full max-w-2xl space-y-5">
-      <Logo />
-      <Card>
-        <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100">⚙️ Configura la partida</h2>
-        <p className="font-semibold text-slate-500 dark:text-slate-400">Personaliza nombres, rondas y tiempo.</p>
+    <div className="animate-fade-up mx-auto w-full max-w-lg space-y-8 lg:max-w-3xl">
+      <div>
+        <button onClick={onBack} className="mb-4 text-sm font-bold transition-soft hover:opacity-70" style={{ color: 'var(--ink-soft)' }}>
+          ← Volver
+        </button>
+        <SectionTitle>Configura la partida</SectionTitle>
+        <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
+          Nombres, rondas y tiempo.
+        </p>
+      </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border-2 border-sky-100 bg-sky-50 p-4 dark:border-sky-800/50 dark:bg-sky-900/30">
-            <label className="text-sm font-black uppercase text-sky-600 dark:text-sky-400">🔵 Persona 1</label>
-            <input
-              value={p1}
-              onChange={(e) => setP1(e.target.value)}
-              maxLength={20}
-              placeholder="Ej: Vale"
-              className="mt-2 w-full rounded-xl border-2 border-white bg-white px-4 py-3 text-lg font-extrabold text-slate-700 outline-none focus:border-[#1cb0f6] dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400"
-            />
-          </div>
-          <div className="rounded-2xl border-2 border-purple-100 bg-purple-50 p-4 dark:border-purple-800/50 dark:bg-purple-900/30">
-            <label className="text-sm font-black uppercase text-purple-600 dark:text-purple-400">🟣 Persona 2</label>
-            <input
-              value={p2}
-              onChange={(e) => setP2(e.target.value)}
-              maxLength={20}
-              placeholder="Ej: Santi"
-              className="mt-2 w-full rounded-xl border-2 border-white bg-white px-4 py-3 text-lg font-extrabold text-slate-700 outline-none focus:border-[#a560ff] dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400"
-            />
-          </div>
-        </div>
-
-        <div className="mt-4 rounded-2xl border-2 border-amber-100 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-900/30">
-          <div className="flex items-center justify-between">
-            <label className="font-black text-slate-700 dark:text-slate-200">🔁 Rondas por jugador: <span className="text-xl text-amber-600 dark:text-amber-400">{rounds}</span></label>
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Total preguntas: {rounds * 2}</span>
-          </div>
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-10">
+      {/* Nombres: sin cajas de color, más limpio */}
+      <div className="space-y-4">
+        <div>
+          <Eyebrow>Jugador 1</Eyebrow>
           <input
-            type="range" min={1} max={10} value={rounds}
-            onChange={(e) => setRounds(Number(e.target.value))}
-            className="mt-3 w-full accent-amber-500"
+            value={p1}
+            onChange={(e) => setP1(e.target.value)}
+            maxLength={20}
+            placeholder="Nombre"
+            className="mt-1.5 w-full rounded-xl px-4 py-3 text-lg font-bold transition-soft"
+            style={{ background: 'var(--card)', border: '2px solid var(--line)', color: 'var(--ink)' }}
           />
-          <div className="flex justify-between text-xs font-black text-slate-400 dark:text-slate-500"><span>1 chill</span><span>5 pro</span><span>10 extremo 🔥</span></div>
         </div>
+        <div>
+          <Eyebrow>Jugador 2</Eyebrow>
+          <input
+            value={p2}
+            onChange={(e) => setP2(e.target.value)}
+            maxLength={20}
+            placeholder="Nombre"
+            className="mt-1.5 w-full rounded-xl px-4 py-3 text-lg font-bold transition-soft"
+            style={{ background: 'var(--card)', border: '2px solid var(--line)', color: 'var(--ink)' }}
+          />
+        </div>
+      </div>
 
-        <div className="mt-4 rounded-2xl border-2 border-green-100 bg-green-50 p-4 dark:border-green-800/50 dark:bg-green-900/30">
-          <div className="flex items-center justify-between gap-2">
-            <label className="font-black text-slate-700 dark:text-slate-200">⏱️ Tiempo para responder: <span className="text-xl text-green-700 dark:text-green-400">{noLimit ? '∞' : `${timer}s`}</span></label>
-            <label className="flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-sm font-black text-slate-600 border dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600">
-              <input type="checkbox" checked={noLimit} onChange={(e) => setNoLimit(e.target.checked)} className="h-4 w-4 accent-green-600" />
+      <div className="mt-8 space-y-8 lg:mt-0">
+      {/* Rondas */}
+      <div>
+        <div className="flex items-baseline justify-between">
+          <span className="font-bold" style={{ color: 'var(--ink)' }}>Rondas por jugador</span>
+          <span className="text-2xl font-extrabold" style={{ color: 'var(--teal)' }}>{rounds}</span>
+        </div>
+        <input
+          type="range" min={1} max={10} value={rounds}
+          onChange={(e) => setRounds(Number(e.target.value))}
+          className="mt-3 w-full"
+        />
+        <div className="mt-1 flex justify-between text-[0.7rem] font-bold" style={{ color: 'var(--ink-faint)' }}>
+          <span>1</span><span>5</span><span>10</span>
+        </div>
+        <p className="mt-1 text-xs font-semibold" style={{ color: 'var(--ink-faint)' }}>
+          Total: {rounds * 2} preguntas
+        </p>
+      </div>
+
+      {/* Tiempo */}
+      <div>
+        <div className="flex items-center justify-between">
+          <span className="font-bold" style={{ color: 'var(--ink)' }}>Tiempo por respuesta</span>
+          <div className="flex items-center gap-3">
+            <span className="text-xl font-extrabold" style={{ color: 'var(--teal)' }}>{noLimit ? '∞' : `${timer}s`}</span>
+            <label className="flex cursor-pointer items-center gap-1.5 text-sm font-bold" style={{ color: 'var(--ink-soft)' }}>
+              <input type="checkbox" checked={noLimit} onChange={(e) => setNoLimit(e.target.checked)} className="h-4 w-4" />
               Sin límite
             </label>
           </div>
-          {!noLimit && (
-            <input type="range" min={5} max={60} step={5} value={timer} onChange={(e) => setTimer(Number(e.target.value))} className="mt-3 w-full accent-green-600" />
-          )}
-          <div className="text-xs font-bold text-slate-500 dark:text-slate-400">Si se acaba el tiempo: 0 puntos y sigue 👉</div>
         </div>
+        {!noLimit && (
+          <input
+            type="range" min={5} max={60} step={5} value={timer}
+            onChange={(e) => setTimer(Number(e.target.value))}
+            className="mt-3 w-full"
+          />
+        )}
+        <p className="mt-1 text-xs font-semibold" style={{ color: 'var(--ink-faint)' }}>
+          Si se acaba el tiempo: 0 puntos y sigue.
+        </p>
+      </div>
 
-        <div className="mt-4 flex items-center justify-between rounded-2xl border-2 border-pink-100 bg-pink-50 p-4 dark:border-pink-800/50 dark:bg-pink-900/30">
-          <div>
-            <div className="font-black text-slate-700 dark:text-slate-200">⚡ Muerte súbita</div>
-            <div className="text-sm font-semibold text-slate-500 dark:text-slate-400">Si empatan: 1 pregunta extra c/u hasta desempatar</div>
-          </div>
-          <button
-            onClick={() => setSudden(!sudden)}
-            className={`relative h-8 w-14 rounded-full transition-colors ${sudden ? 'bg-[#58cc02]' : 'bg-slate-300 dark:bg-slate-600'}`}
-            aria-label="muerte subita"
-          >
-            <span className={`absolute top-1 h-6 w-6 rounded-full bg-white shadow transition-all ${sudden ? 'left-7' : 'left-1'}`} />
-          </button>
+      {/* Muerte súbita */}
+      <div className="flex items-center justify-between rounded-xl p-4" style={{ background: 'var(--gold-soft)', border: '1px solid var(--gold)' }}>
+        <div>
+          <div className="font-extrabold" style={{ color: 'var(--ink)' }}>⚡ Muerte súbita</div>
+          <div className="text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>1 pregunta extra si empatan</div>
         </div>
+        <button
+          onClick={() => setSudden(!sudden)}
+          className="relative h-7 w-12 rounded-full transition-soft"
+          style={{ background: sudden ? 'var(--teal)' : 'var(--line)' }}
+          aria-label="muerte subita"
+        >
+          <span
+            className="absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-sm transition-all"
+            style={{ left: sudden ? 'calc(100% - 1.375rem)' : '0.125rem' }}
+          />
+        </button>
+      </div>
+      </div>
+      </div>
 
-        <div className="mt-5 grid gap-3">
-          <Button color="green" disabled={!canStart} onClick={() => onStart({ p1: p1.trim() || 'Persona 1', p2: p2.trim() || 'Persona 2', rounds, timer, noLimit, sudden })}>
-            ¡A preguntar! ✍️
-          </Button>
-          <Button color="white" onClick={onBack}>← Volver</Button>
-          {!canStart && <p className="text-center text-sm font-bold text-red-500">Escribe los dos nombres para continuar ✏️</p>}
-        </div>
-      </Card>
+      <div className="space-y-2 pb-6">
+        <Button variant="primary" disabled={!canStart} onClick={() => onStart({ p1: p1.trim() || 'Persona 1', p2: p2.trim() || 'Persona 2', rounds, timer, noLimit, sudden })}>
+          ¡A preguntar! →
+        </Button>
+        {!canStart && (
+          <p className="text-center text-sm font-bold" style={{ color: 'var(--coral)' }}>
+            Escribe los dos nombres
+          </p>
+        )}
+      </div>
     </div>
   )
 }
@@ -239,7 +314,6 @@ function SetupScreen({ initial, onBack, onStart }) {
 function CreateQuestionsScreen({ authorName, otherName, authorKey, current, total, roundLabel, isSudden, onSave }) {
   const [q, setQ] = useState('')
   const [a, setA] = useState('')
-
   const canSave = q.trim().length >= 3 && a.trim().length >= 1
 
   const handle = () => {
@@ -249,52 +323,65 @@ function CreateQuestionsScreen({ authorName, otherName, authorKey, current, tota
     setA('')
   }
 
+  const borderColor = authorKey === 'p1' ? 'var(--teal)' : 'var(--coral)'
+
   return (
-    <div className="animate-pop-in mx-auto w-full max-w-2xl space-y-5">
+    <div className="animate-fade-up mx-auto w-full max-w-lg space-y-6 sm:max-w-xl">
       <div className="text-center">
-        <div className="inline-flex items-center gap-2 rounded-full bg-slate-800 px-4 py-1.5 text-sm font-black text-white dark:bg-slate-700">
-          ✍️ Creando preguntas {current}/{total} {isSudden ? '⚡ MUERTE SÚBITA' : ''}
+        <Eyebrow>{roundLabel} {isSudden && '· Muerte súbita'}</Eyebrow>
+        <h2 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: 'var(--ink)' }}>
+          Turno de {authorName}
+        </h2>
+        <div className="mt-3 inline-block rounded-xl px-4 py-2.5 text-sm font-bold" style={{ background: 'var(--gold-soft)', color: 'var(--ink)', border: '1px solid var(--gold)' }}>
+          📱 Pasa el teléfono a {authorName}. {otherName}, no mires.
         </div>
-        <h2 className="mt-3 text-3xl font-black text-slate-800 dark:text-slate-100">Turno de {authorName} 🎤</h2>
-        <p className="mx-auto mt-2 max-w-md rounded-2xl bg-amber-100 border-2 border-amber-200 px-4 py-2 font-bold text-amber-800 dark:bg-amber-900/40 dark:border-amber-700/50 dark:text-amber-300">
-          📱 Pasa el teléfono a <b>{authorName}</b>. <br />{otherName}, ¡no mires! 🙈
-        </p>
       </div>
 
-      <Card>
-        <div className="mb-3 flex items-center justify-between">
-          <PlayerBadge who={authorKey} name={authorName} />
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-black text-slate-500 dark:bg-slate-700 dark:text-slate-300">{roundLabel}</span>
+      <Panel>
+        <div className="mb-4 flex items-center justify-between">
+          <PlayerTag who={authorKey} name={authorName} />
+          <span className="text-sm font-bold" style={{ color: 'var(--ink-faint)' }}>{current}/{total}</span>
         </div>
-        <label className="font-black text-slate-700 dark:text-slate-200">Tu pregunta ❓</label>
+
+        <label className="block text-sm font-extrabold" style={{ color: 'var(--ink)' }}>Pregunta</label>
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Ej: ¿Cuál es mi color favorito?"
+          placeholder="¿Cuál es mi color favorito?"
           maxLength={120}
-          className="mt-2 w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-lg font-bold outline-none focus:border-[#1cb0f6] focus:bg-white dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400 dark:focus:bg-slate-600"
+          className="mt-1.5 w-full rounded-xl px-4 py-3 text-base font-semibold transition-soft"
+          style={{ background: 'var(--paper)', border: '2px solid var(--line)', color: 'var(--ink)' }}
         />
-        <label className="mt-4 block font-black text-slate-700 dark:text-slate-200">Tu respuesta secreta 🔒 <span className="font-semibold text-slate-400 dark:text-slate-500">(luego hay que adivinarla)</span></label>
+
+        <label className="mt-4 block text-sm font-extrabold" style={{ color: 'var(--ink)' }}>
+          Respuesta secreta 🔒
+        </label>
         <input
           value={a}
           onChange={(e) => setA(e.target.value)}
-          placeholder="Ej: Azul"
+          placeholder="Azul"
           maxLength={80}
-          className="mt-2 w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-lg font-bold outline-none focus:border-[#a560ff] focus:bg-white dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400 dark:focus:bg-slate-600"
+          className="mt-1.5 w-full rounded-xl px-4 py-3 text-base font-semibold transition-soft"
+          style={{ background: 'var(--paper)', border: '2px solid var(--line)', color: 'var(--ink)' }}
         />
-        <p className="mt-2 text-sm font-semibold text-slate-400 dark:text-slate-500">Se valida sin tildes ni mayúsculas: "Azúl" = "azul" ✅</p>
-        <div className="mt-4">
-          <Button color={authorKey === 'p1' ? 'blue' : 'purple'} disabled={!canSave} onClick={handle}>
-            Guardar y continuar 👉 ({current}/{total})
+        <p className="mt-2 text-xs font-semibold" style={{ color: 'var(--ink-faint)' }}>
+          Se ignora mayúsculas y tildes: "Azúl" = "azul"
+        </p>
+
+        <div className="mt-5">
+          <Button variant={authorKey === 'p1' ? 'primary' : 'coral'} disabled={!canSave} onClick={handle}>
+            Guardar ({current}/{total}) →
           </Button>
         </div>
-        {/* progreso */}
-        <div className="mt-4 flex gap-1.5">
-          {Array.from({ length: total }).map((_, i) => (
-            <div key={i} className={`h-2.5 flex-1 rounded-full ${i < current - 1 ? 'bg-green-400' : i === current - 1 ? 'bg-amber-400' : 'bg-slate-200 dark:bg-slate-600'}`} />
-          ))}
+
+        {/* Progreso: más limpio */}
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full" style={{ background: 'var(--line)' }}>
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${((current - 1) / total) * 100}%`, background: borderColor }}
+          />
         </div>
-      </Card>
+      </Panel>
     </div>
   )
 }
@@ -314,8 +401,7 @@ function AnswerScreen({ question, guesserName, authorName, guesserKey, qNumber, 
   useEffect(() => {
     if (noLimit || feedback) return
     if (left <= 0) {
-      const fb = { isCorrect: false, correct: question.answer, timedOut: true, guessVal: guess }
-      setFeedback(fb)
+      setFeedback({ isCorrect: false, correct: question.answer, timedOut: true, guessVal: guess })
       return
     }
     const t = setTimeout(() => setLeft((s) => s - 1), 1000)
@@ -332,43 +418,47 @@ function AnswerScreen({ question, guesserName, authorName, guesserKey, qNumber, 
   const danger = !noLimit && left <= 5 && !feedback
 
   return (
-    <div className="animate-pop-in mx-auto w-full max-w-2xl space-y-5">
+    <div className="animate-fade-up mx-auto w-full max-w-lg space-y-5 sm:max-w-xl">
       <div className="text-center">
-        <div className="inline-flex items-center gap-2 rounded-full bg-slate-800 px-4 py-1.5 text-sm font-black text-white dark:bg-slate-700">
-          🤔 Respondiendo {qNumber}/{qTotal}
-        </div>
-        <h2 className="mt-3 text-3xl font-black text-slate-800 dark:text-slate-100">¡Adivina, {guesserName}! ⚡</h2>
-        <p className="mt-1 font-bold text-slate-500 dark:text-slate-400">Pregunta de {authorName} • +1 punto si aciertas 🎯</p>
+        <Eyebrow>Respondiendo {qNumber}/{qTotal}</Eyebrow>
+        <h2 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: 'var(--ink)' }}>
+          ¡Adivina, {guesserName}!
+        </h2>
+        <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
+          Pregunta de {authorName} · +1 punto si aciertas
+        </p>
       </div>
 
+      {/* Timer: más minimalista */}
       {!noLimit && !feedback && (
-        <div className={`rounded-2xl border-2 bg-white p-3 ${danger ? 'border-red-200 animate-timer-danger' : 'border-slate-100'} dark:bg-slate-800 dark:border-slate-700`}>
-          <div className="flex items-center justify-between text-sm font-black">
-            <span>⏱️ {left}s</span>
-            <span className={danger ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}>{danger ? '¡Corre! 🏃' : 'Tú puedes 💪'}</span>
+        <div className={`rounded-xl px-4 py-3 ${danger ? 'animate-timer-danger' : ''}`} style={{ background: danger ? 'var(--coral-soft)' : 'var(--card)', border: `1px solid ${danger ? 'var(--coral)' : 'var(--line)'}` }}>
+          <div className="flex items-center justify-between text-sm font-extrabold">
+            <span style={{ color: danger ? 'var(--coral)' : 'var(--ink)' }}>{left}s</span>
+            <span style={{ color: danger ? 'var(--coral)' : 'var(--ink-faint)' }}>{danger ? '¡Corre!' : 'Tú puedes'}</span>
           </div>
-          <div className="mt-2 h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+          <div className="mt-2 h-2 overflow-hidden rounded-full" style={{ background: 'var(--line)' }}>
             <div
-              className={`h-full rounded-full transition-all duration-500 ${left <= 5 ? 'bg-red-400' : left <= 10 ? 'bg-amber-400' : 'bg-green-400'}`}
-              style={{ width: `${pct}%` }}
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${pct}%`,
+                background: left <= 5 ? 'var(--coral)' : left <= 10 ? 'var(--gold)' : 'var(--teal)',
+              }}
             />
           </div>
         </div>
       )}
 
-      <Card>
-        <div className="mb-3 flex items-center justify-between">
-          <PlayerBadge who={guesserKey} name={guesserName} />
-          <span className="text-2xl">❓</span>
-        </div>
-        <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-slate-100 p-5 text-center dark:from-blue-900/30 dark:to-purple-900/30 dark:border-slate-700">
-          <div className="text-sm font-black uppercase tracking-wide text-slate-400 dark:text-slate-500">Pregunta</div>
-          <div className="mt-1 text-2xl font-black text-slate-800 dark:text-slate-100">"{question.text}"</div>
+      <Panel>
+        {/* Pregunta: sin gradiente, más editorial */}
+        <div className="rounded-xl p-5 text-center" style={{ background: 'var(--paper)', border: '1px solid var(--line)' }}>
+          <p className="text-xl sm:text-2xl font-extrabold leading-snug" style={{ color: 'var(--ink)' }}>
+            "{question.text}"
+          </p>
         </div>
 
         {!feedback ? (
-          <div className="mt-4">
-            <label className="font-black text-slate-700 dark:text-slate-200">Tu respuesta ✏️</label>
+          <div className="mt-5">
+            <label className="block text-sm font-extrabold" style={{ color: 'var(--ink)' }}>Tu respuesta</label>
             <input
               value={guess}
               onChange={(e) => setGuess(e.target.value)}
@@ -376,42 +466,53 @@ function AnswerScreen({ question, guesserName, authorName, guesserKey, qNumber, 
               placeholder="Escribe lo que crees..."
               maxLength={80}
               autoFocus
-              className="mt-2 w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-lg font-bold outline-none focus:border-green-400 focus:bg-white dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400 dark:focus:bg-slate-600"
+              className="mt-1.5 w-full rounded-xl px-4 py-3 text-base font-semibold transition-soft"
+              style={{ background: 'var(--paper)', border: '2px solid var(--line)', color: 'var(--ink)' }}
             />
-            <div className="mt-3">
-              <Button color="green" disabled={guess.trim().length === 0} onClick={submit}>Responder ✅</Button>
+            <div className="mt-4">
+              <Button variant="primary" disabled={guess.trim().length === 0} onClick={submit}>
+                Responder →
+              </Button>
             </div>
           </div>
         ) : (
-          <div className={`animate-pop-in mt-4 rounded-2xl border-2 p-5 text-center ${feedback.isCorrect ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/30' : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/30'}`}>
+          <div
+            className="animate-fade-up mt-5 rounded-xl p-5 text-center"
+            style={{
+              background: feedback.isCorrect ? 'var(--leaf-soft)' : 'var(--coral-soft)',
+              border: `1px solid ${feedback.isCorrect ? 'var(--leaf)' : 'var(--coral)'}`,
+            }}
+          >
             {feedback.timedOut ? (
               <>
-                <div className="text-5xl">⏰</div>
-                <div className="mt-2 text-2xl font-black text-slate-800 dark:text-slate-100">¡Tiempo agotado!</div>
-                <div className="font-bold text-slate-500 dark:text-slate-400">0 puntos esta vez. Era: <b className="text-slate-800 dark:text-slate-100">"{feedback.correct}"</b></div>
-                <div className="text-sm font-semibold text-slate-400 dark:text-slate-500">Dijiste: "{feedback.guessVal || '—'}"</div>
+                <div className="text-4xl">⏰</div>
+                <div className="mt-2 text-xl font-extrabold" style={{ color: 'var(--ink)' }}>Tiempo agotado</div>
+                <div className="mt-1 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
+                  Era: <b style={{ color: 'var(--ink)' }}>"{feedback.correct}"</b>
+                </div>
               </>
             ) : feedback.isCorrect ? (
               <>
-                <div className="animate-point-pop text-5xl">🎉</div>
-                <div className="mt-2 text-2xl font-black text-green-700 dark:text-green-400">¡Correcto! +1 punto ✨</div>
-                <div className="font-bold text-slate-600 dark:text-slate-300">"{feedback.correct}" ¡Se conocen! 💛</div>
+                <div className="animate-score-pop text-4xl">✓</div>
+                <div className="mt-2 text-xl font-extrabold" style={{ color: 'var(--leaf)' }}>¡Correcto! +1 punto</div>
               </>
             ) : (
               <>
-                <div className="text-5xl">😅</div>
-                <div className="mt-2 text-2xl font-black text-slate-800 dark:text-slate-100">¡Casi! Era: "{feedback.correct}"</div>
-                <div className="font-bold text-slate-500 dark:text-slate-400">Dijiste: "{feedback.guessVal}" • 0 puntos</div>
+                <div className="text-4xl">✗</div>
+                <div className="mt-2 text-xl font-extrabold" style={{ color: 'var(--ink)' }}>Era: "{feedback.correct}"</div>
+                <div className="mt-1 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
+                  Dijiste: "{feedback.guessVal}"
+                </div>
               </>
             )}
             <div className="mt-4">
-              <Button color={feedback.isCorrect ? 'green' : 'blue'} onClick={() => onAnswer(feedback)}>
-                {qNumber === qTotal ? 'Ver resultados 🏆' : 'Siguiente 👉'}
+              <Button variant={feedback.isCorrect ? 'primary' : 'secondary'} onClick={() => onAnswer(feedback)}>
+                {qNumber === qTotal ? 'Ver resultados' : 'Siguiente →'}
               </Button>
             </div>
           </div>
         )}
-      </Card>
+      </Panel>
     </div>
   )
 }
@@ -422,66 +523,90 @@ function ResultsScreen({ p1, p2, scores, detail, suddenEnabled, suddenRounds, on
   const totalQs = detail.length
 
   return (
-    <div className="animate-pop-in mx-auto w-full max-w-3xl space-y-5">
-      <div className="text-center">
-        <div className="text-6xl">{winner ? '🏆' : '🤝'}</div>
-        <h2 className="mt-2 text-4xl font-black text-slate-800 dark:text-slate-100">
-          {winner ? `¡Gana ${winnerName}!` : '¡Empate! 😱'}
+    <div className="animate-fade-up mx-auto w-full max-w-lg space-y-8 lg:max-w-3xl">
+      <div className="text-center pt-2">
+        <div className="text-5xl select-none">{winner ? '🏆' : '🤝'}</div>
+        <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight" style={{ color: 'var(--ink)' }}>
+          {winner ? `¡Gana ${winnerName}!` : '¡Empate!'}
         </h2>
-        <p className="font-bold text-slate-500 dark:text-slate-400">
+        <p className="mt-1.5 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
           {winner
-            ? (winner === 'p1' ? `${p1} conoce mejor a ${p2} 💛` : `${p2} conoce mejor a ${p1} 💜`)
+            ? (winner === 'p1' ? `${p1} conoce mejor a ${p2}` : `${p2} conoce mejor a ${p1}`)
             : suddenEnabled
-              ? 'Están muy parejos... ¡Muerte súbita! ⚡'
-              : '¡Son igual de friends (o de fakes)! 😂'}
+              ? 'Muy parejos... ¡Muerte súbita!'
+              : 'Son igual de amigos (o de fakes)'}
         </p>
-        {suddenRounds > 0 && <p className="mt-1 inline-block rounded-full bg-pink-100 px-3 py-1 text-sm font-black text-pink-600 dark:bg-pink-900/40 dark:text-pink-400">⚡ Rondas de muerte súbita: {suddenRounds}</p>}
+        {suddenRounds > 0 && (
+          <p className="mt-2 inline-block rounded-full px-3 py-1 text-xs font-extrabold" style={{ background: 'var(--gold-soft)', color: 'var(--gold)', border: '1px solid var(--gold)' }}>
+            ⚡ {suddenRounds} rondas de muerte súbita
+          </p>
+        )}
       </div>
 
-      <Card>
-        <h3 className="text-center text-xl font-black text-slate-700 dark:text-slate-200">📊 Tabla final</h3>
-        <div className="mt-3 flex gap-3">
-          <ScorePill label={`🔵 ${p1}`} points={scores.p1} color="border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-800/50 dark:bg-sky-900/30 dark:text-sky-400" />
-          <div className="flex items-center text-2xl font-black text-slate-300 dark:text-slate-600">VS</div>
-          <ScorePill label={`🟣 ${p2}`} points={scores.p2} color="border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800/50 dark:bg-purple-900/30 dark:text-purple-400" />
+      {/* Puntajes: más impacto visual */}
+      <div className="flex items-stretch gap-3">
+        <div className="flex-1 rounded-2xl p-5 text-center" style={{ background: 'var(--teal-soft)', border: '2px solid var(--teal)' }}>
+          <div className="text-xs font-extrabold uppercase tracking-wider" style={{ color: 'var(--teal)' }}>{p1}</div>
+          <div className="animate-score-pop mt-1 text-5xl font-extrabold" style={{ color: 'var(--teal)' }}>{scores.p1}</div>
         </div>
-        <div className="mt-4">
-          <div className="flex h-4 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
-            <div className="bg-[#1cb0f6] transition-all" style={{ width: `${totalQs ? (scores.p1 / totalQs) * 100 : 50}%` }} />
-            <div className="bg-[#a560ff] transition-all" style={{ width: `${totalQs ? (scores.p2 / totalQs) * 100 : 50}%` }} />
-          </div>
-          <div className="mt-1 flex justify-between text-xs font-black text-slate-400 dark:text-slate-500">
-            <span>{p1}: {scores.p1}/{totalQs}</span><span>{p2}: {scores.p2}/{totalQs}</span>
-          </div>
+        <div className="flex items-center px-1">
+          <span className="text-lg font-extrabold" style={{ color: 'var(--ink-faint)' }}>vs</span>
         </div>
+        <div className="flex-1 rounded-2xl p-5 text-center" style={{ background: 'var(--coral-soft)', border: '2px solid var(--coral)' }}>
+          <div className="text-xs font-extrabold uppercase tracking-wider" style={{ color: 'var(--coral)' }}>{p2}</div>
+          <div className="animate-score-pop mt-1 text-5xl font-extrabold" style={{ color: 'var(--coral)' }}>{scores.p2}</div>
+        </div>
+      </div>
 
-        {!winner && suddenEnabled && (
-          <div className="mt-4">
-            <Button color="pink" onClick={onSuddenDeath}>⚡ Desempatar: muerte súbita (1 pregunta c/u)</Button>
-          </div>
-        )}
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          <Button color="green" onClick={onReplay}>🔄 Jugar de nuevo</Button>
-          <Button color="white" onClick={onHome}>🏠 Inicio</Button>
+      {/* Barra proporcional */}
+      <div>
+        <div className="flex h-3 overflow-hidden rounded-full" style={{ background: 'var(--line)' }}>
+          <div style={{ width: `${totalQs ? (scores.p1 / totalQs) * 100 : 50}%`, background: 'var(--teal)', transition: 'width 0.6s ease' }} />
+          <div style={{ width: `${totalQs ? (scores.p2 / totalQs) * 100 : 50}%`, background: 'var(--coral)', transition: 'width 0.6s ease' }} />
         </div>
-      </Card>
+        <div className="mt-1.5 flex justify-between text-xs font-bold" style={{ color: 'var(--ink-faint)' }}>
+          <span>{p1}: {scores.p1}/{totalQs}</span>
+          <span>{p2}: {scores.p2}/{totalQs}</span>
+        </div>
+      </div>
 
-      <Card>
-        <h3 className="text-xl font-black text-slate-700 dark:text-slate-200">🧾 Detalle ronda por ronda</h3>
-        <div className="mt-3 space-y-2">
+      {!winner && suddenEnabled && (
+        <Button variant="coral" onClick={onSuddenDeath}>⚡ Muerte súbita — 1 pregunta extra</Button>
+      )}
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Button variant="primary" onClick={onReplay}>Jugar de nuevo</Button>
+        <Button variant="secondary" onClick={onHome}>Inicio</Button>
+      </div>
+
+      {/* Detalle: más limpio, sin bordes pesados */}
+      <div>
+        <Eyebrow>Detalle</Eyebrow>
+        <div className="mt-3 grid gap-2 lg:grid-cols-2">
           {detail.map((d, i) => (
-            <div key={i} className={`rounded-2xl border-2 p-3 ${d.isCorrect ? 'border-green-100 bg-green-50 dark:border-green-800/50 dark:bg-green-900/20' : 'border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50'}`}>
+            <div
+              key={i}
+              className="rounded-xl p-3.5"
+              style={{
+                background: d.isCorrect ? 'var(--leaf-soft)' : 'var(--card)',
+                border: `1px solid ${d.isCorrect ? 'var(--leaf)' : 'var(--line)'}`,
+              }}
+            >
               <div className="flex items-start justify-between gap-2">
-                <div className="font-extrabold text-slate-700 dark:text-slate-200">{i + 1}. "{d.questionText}"</div>
-                <div className="text-xl">{d.isCorrect ? '✅' : d.timedOut ? '⏰' : '❌'}</div>
+                <span className="text-sm font-bold" style={{ color: 'var(--ink)' }}>
+                  {i + 1}. "{d.questionText}"
+                </span>
+                <span className="shrink-0 text-sm font-extrabold" style={{ color: d.isCorrect ? 'var(--leaf)' : 'var(--coral)' }}>
+                  {d.isCorrect ? '✓' : d.timedOut ? '⏰' : '✗'}
+                </span>
               </div>
-              <div className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
-                De <b>{d.author === 'p1' ? p1 : p2}</b> • Adivina <b>{d.guesser === 'p1' ? p1 : p2}</b> • Dijo "{d.guess || '—'}" • Era "{d.correctAnswer}"
+              <div className="mt-1 text-xs font-semibold" style={{ color: 'var(--ink-soft)' }}>
+                {d.author === 'p1' ? p1 : p2} preguntó · {d.guesser === 'p1' ? p1 : p2} dijo "{d.guess || '—'}" · Era "{d.correctAnswer}"
               </div>
             </div>
           ))}
         </div>
-      </Card>
+      </div>
     </div>
   )
 }
@@ -493,70 +618,76 @@ function SchoolConfigScreen({ onBack, onStart }) {
   const [qCount, setQCount] = useState(10)
   const [timer, setTimer] = useState(20)
   const [noLimit, setNoLimit] = useState(false)
-  const [mode, setMode] = useState('options') // 'options' | 'written'
+  const [mode, setMode] = useState('options')
 
   const section = SECTIONS.find((s) => s.id === sectionId)
   const subject = section?.subjects.find((s) => s.name === subjectName)
   const maxQ = subject ? subject.questions.length : 60
-
-  const canStart = section && (qCount >= 1 && qCount <= maxQ)
+  const canStart = section && qCount >= 1 && qCount <= maxQ
 
   const pickSection = (id) => {
     setSectionId(id)
     setSubjectName(null)
-    const sec = SECTIONS.find((s) => s.id === id)
-    const max = 60
-    setQCount((c) => Math.min(c, max))
+    setQCount((c) => Math.min(c, 60))
   }
 
   const pickSubject = (name) => {
     setSubjectName(name)
     const sec = SECTIONS.find((s) => s.id === sectionId)
     const sub = name ? sec.subjects.find((s) => s.name === name) : null
-    const max = sub ? sub.questions.length : 60
-    setQCount((c) => Math.min(c, max))
+    setQCount((c) => Math.min(c, sub ? sub.questions.length : 60))
   }
 
   return (
-    <div className="animate-pop-in mx-auto w-full max-w-2xl space-y-5">
-      <div className="text-center">
-        <div className="text-5xl">🎒</div>
-        <h2 className="mt-2 text-3xl font-black text-slate-800 dark:text-slate-100">Preguntas del Cole</h2>
-        <p className="font-bold text-slate-500 dark:text-slate-400">Elige sección, materia y dificultad 📚</p>
+    <div className="animate-fade-up mx-auto w-full max-w-lg space-y-7 lg:max-w-3xl">
+      <div>
+        <button onClick={onBack} className="mb-4 text-sm font-bold transition-soft hover:opacity-70" style={{ color: 'var(--ink-soft)' }}>
+          ← Volver
+        </button>
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: 'var(--ink)' }}>
+          🎒 Preguntas del Cole
+        </h2>
+        <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
+          180 preguntas de Ecuador · 4 materias · 3 niveles
+        </p>
       </div>
 
-      <Card>
-        <h3 className="text-lg font-black text-slate-700 dark:text-slate-200">1️⃣ Sección</h3>
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-10">
+      <div className="space-y-7">
+      {/* Sección */}
+      <div>
+        <Eyebrow>Nivel</Eyebrow>
+        <div className="mt-2 grid grid-cols-3 gap-2">
           {SECTIONS.map((s) => (
             <button
               key={s.id}
               onClick={() => pickSection(s.id)}
-              className={`btn-3d rounded-2xl border-2 p-4 text-center ${
-                sectionId === s.id
-                  ? 'border-[#58cc02] bg-green-50 dark:border-[#58cc02] dark:bg-green-900/30'
-                  : 'border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700/50 dark:hover:bg-slate-700'
-              }`}
+              className="rounded-xl p-3 text-center transition-soft"
+              style={{
+                background: sectionId === s.id ? 'var(--teal-soft)' : 'var(--card)',
+                border: `2px solid ${sectionId === s.id ? 'var(--teal)' : 'var(--line)'}`,
+              }}
             >
-              <div className="text-3xl">{s.emoji}</div>
-              <div className="mt-1 font-black text-slate-800 dark:text-slate-100">{s.name}</div>
-              <div className="text-xs font-bold text-slate-500 dark:text-slate-400">{s.level}</div>
+              <div className="text-2xl">{s.emoji}</div>
+              <div className="mt-1 text-sm font-extrabold" style={{ color: 'var(--ink)' }}>{s.name}</div>
+              <div className="text-[0.65rem] font-bold" style={{ color: 'var(--ink-faint)' }}>{s.level}</div>
             </button>
           ))}
         </div>
-      </Card>
+      </div>
 
+      {/* Materia */}
       {section && (
-        <Card>
-          <h3 className="text-lg font-black text-slate-700 dark:text-slate-200">2️⃣ Materia</h3>
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div>
+          <Eyebrow>Materia</Eyebrow>
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
             <button
               onClick={() => pickSubject(null)}
-              className={`btn-3d rounded-xl border-2 px-3 py-3 text-sm font-black ${
-                subjectName === null
-                  ? 'border-[#1cb0f6] bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                  : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300'
-              }`}
+              className="rounded-xl px-3 py-2.5 text-sm font-bold transition-soft"
+              style={{
+                background: subjectName === null ? 'var(--coral-soft)' : 'var(--card)',
+                border: `2px solid ${subjectName === null ? 'var(--coral)' : 'var(--line)'}`,
+              }}
             >
               🎲 Todas
             </button>
@@ -564,108 +695,117 @@ function SchoolConfigScreen({ onBack, onStart }) {
               <button
                 key={sub.name}
                 onClick={() => pickSubject(sub.name)}
-                className={`btn-3d rounded-xl border-2 px-3 py-3 text-sm font-black ${
-                  subjectName === sub.name
-                    ? 'border-[#1cb0f6] bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                    : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300'
-                }`}
+                className="rounded-xl px-3 py-2.5 text-sm font-bold transition-soft"
+                style={{
+                  background: subjectName === sub.name ? 'var(--coral-soft)' : 'var(--card)',
+                  border: `2px solid ${subjectName === sub.name ? 'var(--coral)' : 'var(--line)'}`,
+                }}
               >
                 {sub.emoji} {sub.name}
               </button>
             ))}
           </div>
-        </Card>
+        </div>
       )}
 
+      </div>
+
+      <div className="mt-8 space-y-7 lg:mt-0">
+      {/* Cantidad */}
       {section && (
-        <Card>
-          <h3 className="text-lg font-black text-slate-700 dark:text-slate-200">3️⃣ Cantidad de preguntas</h3>
-          <div className="mt-2 text-center">
-            <span className="text-3xl font-black text-[#58cc02]">{qCount}</span>
-            <span className="ml-2 font-bold text-slate-500 dark:text-slate-400">/ {maxQ} disponibles</span>
+        <div>
+          <div className="flex items-baseline justify-between">
+            <span className="font-bold" style={{ color: 'var(--ink)' }}>Cantidad de preguntas</span>
+            <span className="text-2xl font-extrabold" style={{ color: 'var(--teal)' }}>{qCount}</span>
           </div>
           <input
             type="range" min={1} max={maxQ} value={qCount}
             onChange={(e) => setQCount(Number(e.target.value))}
-            className="mt-3 w-full accent-[#58cc02]"
+            className="mt-3 w-full"
           />
-        </Card>
+          <p className="mt-1 text-xs font-semibold" style={{ color: 'var(--ink-faint)' }}>{maxQ} disponibles</p>
+        </div>
       )}
 
+      {/* Tiempo */}
       {section && (
-        <Card>
-          <h3 className="text-lg font-black text-slate-700 dark:text-slate-200">4️⃣ Tiempo por pregunta</h3>
-          <div className="flex items-center justify-between gap-2">
-            <label className="font-black text-slate-700 dark:text-slate-200">
-              ⏱️ <span className="text-xl text-green-700 dark:text-green-400">{noLimit ? '∞' : `${timer}s`}</span>
-            </label>
-            <label className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-black text-slate-600 border dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600">
-              <input type="checkbox" checked={noLimit} onChange={(e) => setNoLimit(e.target.checked)} className="h-4 w-4 accent-green-600" />
-              Sin límite
-            </label>
+        <div>
+          <div className="flex items-center justify-between">
+            <span className="font-bold" style={{ color: 'var(--ink)' }}>Tiempo por pregunta</span>
+            <div className="flex items-center gap-3">
+              <span className="text-xl font-extrabold" style={{ color: 'var(--teal)' }}>{noLimit ? '∞' : `${timer}s`}</span>
+              <label className="flex cursor-pointer items-center gap-1.5 text-sm font-bold" style={{ color: 'var(--ink-soft)' }}>
+                <input type="checkbox" checked={noLimit} onChange={(e) => setNoLimit(e.target.checked)} className="h-4 w-4" />
+                Sin límite
+              </label>
+            </div>
           </div>
           {!noLimit && (
-            <input type="range" min={5} max={60} step={5} value={timer} onChange={(e) => setTimer(Number(e.target.value))} className="mt-3 w-full accent-green-600" />
+            <input
+              type="range" min={5} max={60} step={5} value={timer}
+              onChange={(e) => setTimer(Number(e.target.value))}
+              className="mt-3 w-full"
+            />
           )}
-        </Card>
+        </div>
       )}
 
+      {/* Tipo respuesta */}
       {section && (
-        <Card>
-          <h3 className="text-lg font-black text-slate-700 dark:text-slate-200">5️⃣ Tipo de respuesta</h3>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div>
+          <Eyebrow>Tipo de respuesta</Eyebrow>
+          <div className="mt-2 grid grid-cols-2 gap-2">
             <button
               onClick={() => setMode('options')}
-              className={`btn-3d rounded-2xl border-2 p-4 text-center ${
-                mode === 'options'
-                  ? 'border-[#58cc02] bg-green-50 dark:bg-green-900/30'
-                  : 'border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-700/50'
-              }`}
+              className="rounded-xl p-4 text-center transition-soft"
+              style={{
+                background: mode === 'options' ? 'var(--teal-soft)' : 'var(--card)',
+                border: `2px solid ${mode === 'options' ? 'var(--teal)' : 'var(--line)'}`,
+              }}
             >
-              <div className="text-3xl">🔘</div>
-              <div className="mt-1 font-black text-slate-800 dark:text-slate-100">Opción múltiple</div>
-              <div className="text-xs font-bold text-slate-500 dark:text-slate-400">Elige A, B o C</div>
+              <div className="text-2xl">🔘</div>
+              <div className="mt-1 font-extrabold" style={{ color: 'var(--ink)' }}>Opción múltiple</div>
+              <div className="text-xs font-semibold" style={{ color: 'var(--ink-faint)' }}>Elige A, B o C</div>
             </button>
             <button
               onClick={() => setMode('written')}
-              className={`btn-3d rounded-2xl border-2 p-4 text-center ${
-                mode === 'written'
-                  ? 'border-[#58cc02] bg-green-50 dark:bg-green-900/30'
-                  : 'border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-700/50'
-              }`}
+              className="rounded-xl p-4 text-center transition-soft"
+              style={{
+                background: mode === 'written' ? 'var(--teal-soft)' : 'var(--card)',
+                border: `2px solid ${mode === 'written' ? 'var(--teal)' : 'var(--line)'}`,
+              }}
             >
-              <div className="text-3xl">✍️</div>
-              <div className="mt-1 font-black text-slate-800 dark:text-slate-100">Escribir</div>
-              <div className="text-xs font-bold text-slate-500 dark:text-slate-400">Como modo amigos</div>
+              <div className="text-2xl">✍️</div>
+              <div className="mt-1 font-extrabold" style={{ color: 'var(--ink)' }}>Escribir</div>
+              <div className="text-xs font-semibold" style={{ color: 'var(--ink-faint)' }}>Escribe la respuesta</div>
             </button>
           </div>
-        </Card>
+        </div>
       )}
+      </div>
+      </div>
 
-      <div className="grid gap-3">
-        <Button
-          color="green"
-          disabled={!canStart}
-          onClick={() => onStart({ sectionId, subjectName, qCount, timer, noLimit, mode })}
-        >
-          ¡Empezar! 🚀
+      <div className="pb-6">
+        <Button variant="primary" disabled={!canStart} onClick={() => onStart({ sectionId, subjectName, qCount, timer, noLimit, mode })}>
+          ¡Empezar! →
         </Button>
-        <Button color="white" onClick={onBack}>← Volver</Button>
-        {!section && <p className="text-center text-sm font-bold text-slate-400">Selecciona una sección para continuar 👆</p>}
+        {!section && (
+          <p className="mt-2 text-center text-sm font-bold" style={{ color: 'var(--ink-faint)' }}>
+            Selecciona un nivel arriba
+          </p>
+        )}
       </div>
     </div>
   )
 }
 
 function SchoolQuizScreen({ question, qNumber, qTotal, timerSeconds, noLimit, mode, onAnswer }) {
-  const [selected, setSelected] = useState(null)
   const [guess, setGuess] = useState('')
   const [left, setLeft] = useState(timerSeconds)
   const [feedback, setFeedback] = useState(null)
   const total = timerSeconds
 
   useEffect(() => {
-    setSelected(null)
     setGuess('')
     setFeedback(null)
     setLeft(timerSeconds)
@@ -683,7 +823,6 @@ function SchoolQuizScreen({ question, qNumber, qTotal, timerSeconds, noLimit, mo
 
   const optionClick = (idx) => {
     if (feedback) return
-    setSelected(idx)
     setFeedback({ isCorrect: idx === question.answer, correctIdx: question.answer, timedOut: false, guessVal: question.options[idx] })
   }
 
@@ -696,55 +835,55 @@ function SchoolQuizScreen({ question, qNumber, qTotal, timerSeconds, noLimit, mo
   const pct = noLimit ? 100 : Math.max(0, (left / total) * 100)
   const danger = !noLimit && left <= 5 && !feedback
   const optLetters = ['A', 'B', 'C']
-  const optColors = ['border-sky-300 bg-sky-50 text-sky-700 dark:border-sky-700 dark:bg-sky-900/30 dark:text-sky-300',
-    'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-    'border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-700 dark:bg-purple-900/30 dark:text-purple-300']
 
   return (
-    <div className="animate-pop-in mx-auto w-full max-w-2xl space-y-5">
+    <div className="animate-fade-up mx-auto w-full max-w-lg space-y-5 sm:max-w-xl">
       <div className="text-center">
-        <div className="inline-flex items-center gap-2 rounded-full bg-slate-800 px-4 py-1.5 text-sm font-black text-white dark:bg-slate-700">
-          🎓 Pregunta {qNumber}/{qTotal}
-        </div>
-        <div className="mt-2 flex items-center justify-center gap-2">
-          <div className="flex gap-1.5">
-            {Array.from({ length: Math.min(qTotal, 15) }).map((_, i) => (
-              <div key={i} className={`h-2 w-2 rounded-full ${i < qNumber - 1 ? 'bg-green-400' : i === qNumber - 1 ? 'bg-amber-400' : 'bg-slate-200 dark:bg-slate-600'}`} />
-            ))}
-            {qTotal > 15 && <span className="text-xs font-black text-slate-400">+{qTotal - 15}</span>}
-          </div>
+        <Eyebrow>Pregunta {qNumber}/{qTotal}</Eyebrow>
+        {/* Progreso como barra limpia */}
+        <div className="mx-auto mt-2 h-1.5 max-w-xs overflow-hidden rounded-full" style={{ background: 'var(--line)' }}>
+          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(qNumber / qTotal) * 100}%`, background: 'var(--teal)' }} />
         </div>
       </div>
 
       {!noLimit && !feedback && (
-        <div className={`rounded-2xl border-2 bg-white p-3 dark:bg-slate-800 ${danger ? 'border-red-200 animate-timer-danger' : 'border-slate-100 dark:border-slate-700'}`}>
-          <div className="flex items-center justify-between text-sm font-black">
-            <span>⏱️ {left}s</span>
-            <span className={danger ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}>{danger ? '¡Corre! 🏃' : 'Tú puedes 💪'}</span>
+        <div className={`rounded-xl px-4 py-3 ${danger ? 'animate-timer-danger' : ''}`} style={{ background: danger ? 'var(--coral-soft)' : 'var(--card)', border: `1px solid ${danger ? 'var(--coral)' : 'var(--line)'}` }}>
+          <div className="flex items-center justify-between text-sm font-extrabold">
+            <span style={{ color: danger ? 'var(--coral)' : 'var(--ink)' }}>{left}s</span>
+            <span style={{ color: danger ? 'var(--coral)' : 'var(--ink-faint)' }}>{danger ? '¡Corre!' : 'Tú puedes'}</span>
           </div>
-          <div className="mt-2 h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+          <div className="mt-2 h-2 overflow-hidden rounded-full" style={{ background: 'var(--line)' }}>
             <div
-              className={`h-full rounded-full transition-all duration-500 ${left <= 5 ? 'bg-red-400' : left <= 10 ? 'bg-amber-400' : 'bg-green-400'}`}
-              style={{ width: `${pct}%` }}
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${pct}%`,
+                background: left <= 5 ? 'var(--coral)' : left <= 10 ? 'var(--gold)' : 'var(--teal)',
+              }}
             />
           </div>
         </div>
       )}
 
-      <Card>
-        <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-slate-100 p-5 text-center dark:from-blue-900/30 dark:to-purple-900/30 dark:border-slate-700">
-          <div className="mt-1 text-xl font-black text-slate-800 sm:text-2xl dark:text-slate-100">"{question.text}"</div>
-        </div>
+      <Panel>
+        <p className="rounded-xl p-5 text-center text-lg sm:text-xl font-extrabold leading-snug" style={{ background: 'var(--paper)', border: '1px solid var(--line)', color: 'var(--ink)' }}>
+          "{question.text}"
+        </p>
 
         {mode === 'options' && !feedback && (
-          <div className="mt-4 grid gap-3">
+          <div className="mt-4 space-y-2.5">
             {question.options.map((opt, idx) => (
               <button
                 key={idx}
                 onClick={() => optionClick(idx)}
-                className={`btn-3d rounded-2xl border-2 border-b-4 px-4 py-4 text-left font-bold ${optColors[idx]}`}
+                className="group w-full rounded-xl px-4 py-3.5 text-left font-bold transition-soft hover:translate-y-[-1px]"
+                style={{ background: 'var(--paper)', border: '2px solid var(--line)', color: 'var(--ink)' }}
               >
-                <span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/60 text-sm font-black shadow-sm dark:bg-black/20">{optLetters[idx]}</span>
+                <span
+                  className="mr-3 inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-extrabold text-white transition-soft group-hover:scale-110"
+                  style={{ background: 'var(--ink-faint)' }}
+                >
+                  {optLetters[idx]}
+                </span>
                 {opt}
               </button>
             ))}
@@ -753,7 +892,7 @@ function SchoolQuizScreen({ question, qNumber, qTotal, timerSeconds, noLimit, mo
 
         {mode === 'written' && !feedback && (
           <div className="mt-4">
-            <label className="font-black text-slate-700 dark:text-slate-200">Tu respuesta ✏️</label>
+            <label className="block text-sm font-extrabold" style={{ color: 'var(--ink)' }}>Tu respuesta</label>
             <input
               value={guess}
               onChange={(e) => setGuess(e.target.value)}
@@ -761,43 +900,53 @@ function SchoolQuizScreen({ question, qNumber, qTotal, timerSeconds, noLimit, mo
               placeholder="Escribe tu respuesta..."
               maxLength={80}
               autoFocus
-              className="mt-2 w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-lg font-bold outline-none focus:border-green-400 focus:bg-white dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400 dark:focus:bg-slate-600"
+              className="mt-1.5 w-full rounded-xl px-4 py-3 text-base font-semibold transition-soft"
+              style={{ background: 'var(--paper)', border: '2px solid var(--line)', color: 'var(--ink)' }}
             />
-            <div className="mt-3">
-              <Button color="green" disabled={!guess.trim()} onClick={submitWritten}>Responder ✅</Button>
+            <div className="mt-4">
+              <Button variant="primary" disabled={!guess.trim()} onClick={submitWritten}>Responder →</Button>
             </div>
           </div>
         )}
 
         {feedback && (
-          <div className={`animate-pop-in mt-4 rounded-2xl border-2 p-5 text-center ${feedback.isCorrect ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/30' : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/30'}`}>
+          <div
+            className="animate-fade-up mt-4 rounded-xl p-5 text-center"
+            style={{
+              background: feedback.isCorrect ? 'var(--leaf-soft)' : 'var(--coral-soft)',
+              border: `1px solid ${feedback.isCorrect ? 'var(--leaf)' : 'var(--coral)'}`,
+            }}
+          >
             {feedback.timedOut ? (
               <>
-                <div className="text-5xl">⏰</div>
-                <div className="mt-2 text-2xl font-black text-slate-800 dark:text-slate-100">¡Tiempo agotado!</div>
-                <div className="font-bold text-slate-500 dark:text-slate-400">0 puntos. Era: <b className="text-slate-800 dark:text-slate-100">{question.options[question.answer]}</b></div>
+                <div className="text-4xl">⏰</div>
+                <div className="mt-2 text-xl font-extrabold" style={{ color: 'var(--ink)' }}>Tiempo agotado</div>
+                <div className="mt-1 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
+                  Era: <b style={{ color: 'var(--ink)' }}>{question.options[question.answer]}</b>
+                </div>
               </>
             ) : feedback.isCorrect ? (
               <>
-                <div className="animate-point-pop text-5xl">🎉</div>
-                <div className="mt-2 text-2xl font-black text-green-700 dark:text-green-400">¡Correcto! +1 punto ✨</div>
+                <div className="animate-score-pop text-4xl">✓</div>
+                <div className="mt-2 text-xl font-extrabold" style={{ color: 'var(--leaf)' }}>¡Correcto! +1 punto</div>
               </>
             ) : (
               <>
-                <div className="text-5xl">😅</div>
-                <div className="mt-2 text-2xl font-black text-slate-800 dark:text-slate-100">La respuesta era: {question.options[question.answer]}</div>
-                {mode === 'written' && <div className="font-bold text-slate-500 dark:text-slate-400">Dijiste: "{feedback.guessVal}"</div>}
-                {mode === 'options' && <div className="font-bold text-slate-500 dark:text-slate-400">Elegiste: {optLetters[feedback.correctIdx]} — era {optLetters[question.answer]}</div>}
+                <div className="text-4xl">✗</div>
+                <div className="mt-2 text-xl font-extrabold" style={{ color: 'var(--ink)' }}>Era: {question.options[question.answer]}</div>
+                {mode === 'written' && (
+                  <div className="mt-1 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>Dijiste: "{feedback.guessVal}"</div>
+                )}
               </>
             )}
             <div className="mt-4">
-              <Button color={feedback.isCorrect ? 'green' : 'blue'} onClick={() => onAnswer(feedback)}>
-                {qNumber === qTotal ? 'Ver resultado 🏆' : 'Siguiente 👉'}
+              <Button variant={feedback.isCorrect ? 'primary' : 'secondary'} onClick={() => onAnswer(feedback)}>
+                {qNumber === qTotal ? 'Ver resultado' : 'Siguiente →'}
               </Button>
             </div>
           </div>
         )}
-      </Card>
+      </Panel>
     </div>
   )
 }
@@ -808,48 +957,66 @@ function SchoolResultsScreen({ score, total, detail, sectionName, subjectName, m
   const msg = pct >= 90 ? '¡Eres un genio!' : pct >= 70 ? '¡Muy bien!' : pct >= 50 ? '¡Sigue practicando!' : '¡No te rindas!'
 
   return (
-    <div className="animate-pop-in mx-auto w-full max-w-2xl space-y-5">
-      <div className="text-center">
-        <div className="text-6xl">{emoji}</div>
-        <h2 className="mt-2 text-4xl font-black text-slate-800 dark:text-slate-100">{msg}</h2>
-        <p className="font-bold text-slate-500 dark:text-slate-400">{sectionName} • {subjectName} • {mode === 'options' ? 'Opción múltiple' : 'Escribir'}</p>
+    <div className="animate-fade-up mx-auto w-full max-w-lg space-y-8 lg:max-w-3xl">
+      <div className="text-center pt-2">
+        <div className="text-5xl select-none">{emoji}</div>
+        <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight" style={{ color: 'var(--ink)' }}>{msg}</h2>
+        <p className="mt-1.5 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
+          {sectionName} · {subjectName} · {mode === 'options' ? 'Opción múltiple' : 'Escribir'}
+        </p>
       </div>
 
-      <Card>
-        <div className="text-center">
-          <div className="text-6xl font-black text-[#58cc02]">{score}/{total}</div>
-          <div className="mt-1 text-xl font-black text-slate-600 dark:text-slate-300">{pct}% correcto</div>
-        </div>
-        <div className="mt-4 h-4 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+      <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--teal-soft)', border: '2px solid var(--teal)' }}>
+        <div className="animate-score-pop text-5xl font-extrabold" style={{ color: 'var(--teal)' }}>{score}/{total}</div>
+        <div className="mt-1 text-base font-bold" style={{ color: 'var(--ink-soft)' }}>{pct}% correcto</div>
+      </div>
+
+      <div>
+        <div className="h-3 overflow-hidden rounded-full" style={{ background: 'var(--line)' }}>
           <div
-            className={`h-full rounded-full transition-all ${pct >= 70 ? 'bg-[#58cc02]' : pct >= 50 ? 'bg-[#ffc800]' : 'bg-[#ff4b4b]'}`}
-            style={{ width: `${pct}%` }}
+            className="h-full rounded-full transition-all"
+            style={{
+              width: `${pct}%`,
+              background: pct >= 70 ? 'var(--leaf)' : pct >= 50 ? 'var(--gold)' : 'var(--coral)',
+            }}
           />
         </div>
-        <div className="mt-5 grid gap-2 sm:grid-cols-2">
-          <Button color="green" onClick={onReplay}>🔄 Otra vez</Button>
-          <Button color="white" onClick={onHome}>🏠 Inicio</Button>
-        </div>
-      </Card>
+      </div>
 
-      <Card>
-        <h3 className="text-lg font-black text-slate-700 dark:text-slate-200">🧾 Revisión</h3>
-        <div className="mt-3 space-y-2">
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Button variant="primary" onClick={onReplay}>Otra vez</Button>
+        <Button variant="secondary" onClick={onHome}>Inicio</Button>
+      </div>
+
+      <div>
+        <Eyebrow>Revisión</Eyebrow>
+        <div className="mt-3 grid gap-2 lg:grid-cols-2">
           {detail.map((d, i) => (
-            <div key={i} className={`rounded-2xl border-2 p-3 ${d.isCorrect ? 'border-green-100 bg-green-50 dark:border-green-800/50 dark:bg-green-900/20' : 'border-red-100 bg-red-50 dark:border-red-800/50 dark:bg-red-900/20'}`}>
+            <div
+              key={i}
+              className="rounded-xl p-3.5"
+              style={{
+                background: d.isCorrect ? 'var(--leaf-soft)' : 'var(--card)',
+                border: `1px solid ${d.isCorrect ? 'var(--leaf)' : 'var(--line)'}`,
+              }}
+            >
               <div className="flex items-start justify-between gap-2">
-                <div className="font-extrabold text-slate-700 dark:text-slate-200">{i + 1}. {d.questionText}</div>
-                <div className="text-xl">{d.isCorrect ? '✅' : d.timedOut ? '⏰' : '❌'}</div>
+                <span className="text-sm font-bold" style={{ color: 'var(--ink)' }}>
+                  {i + 1}. {d.questionText}
+                </span>
+                <span className="shrink-0 text-sm font-extrabold" style={{ color: d.isCorrect ? 'var(--leaf)' : 'var(--coral)' }}>
+                  {d.isCorrect ? '✓' : d.timedOut ? '⏰' : '✗'}
+                </span>
               </div>
               {!d.isCorrect && (
-                <div className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
-                  Tu respuesta: "{d.guessVal || '—'}" • Correcta: "{d.correctAnswer}"
+                <div className="mt-1 text-xs font-semibold" style={{ color: 'var(--ink-soft)' }}>
+                  Dijiste: "{d.guessVal || '—'}" · Correcta: "{d.correctAnswer}"
                 </div>
               )}
             </div>
           ))}
         </div>
-      </Card>
+      </div>
     </div>
   )
 }
@@ -883,6 +1050,10 @@ export default function App() {
     localStorage.setItem('fof-theme', dark ? 'dark' : 'light')
   }, [dark])
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [phase])
+
   const resetGame = (newConfig) => {
     const c = newConfig || config
     setConfig(c)
@@ -897,17 +1068,12 @@ export default function App() {
   }
 
   const startFriendsSetup = () => setPhase('setup')
-
-  const startCreating = (c) => {
-    resetGame(c)
-    setPhase('create')
-  }
+  const startCreating = (c) => { resetGame(c); setPhase('create') }
 
   const handleSaveQuestion = (text, answer) => {
     const author = createIdx % 2 === 0 ? 'p1' : 'p2'
     const q = { id: Date.now() + createIdx, author, text, answer }
-    const next = [...questions, q]
-    setQuestions(next)
+    setQuestions([...questions, q])
     if (createIdx + 1 >= totalToCreate) {
       setAnswerIdx(0)
       setPhase('answer')
@@ -919,24 +1085,13 @@ export default function App() {
   const handleAnswer = (fb) => {
     const q = questions[answerIdx]
     const guesser = q.author === 'p1' ? 'p2' : 'p1'
-    if (fb.isCorrect) {
-      setScores((s) => ({ ...s, [guesser]: s[guesser] + 1 }))
-    }
+    if (fb.isCorrect) setScores((s) => ({ ...s, [guesser]: s[guesser] + 1 }))
     setDetail((d) => [...d, {
-      qId: q.id,
-      questionText: q.text,
-      author: q.author,
-      guesser,
-      guess: fb.guessVal,
-      correctAnswer: fb.correct,
-      isCorrect: fb.isCorrect,
-      timedOut: fb.timedOut,
+      qId: q.id, questionText: q.text, author: q.author, guesser,
+      guess: fb.guessVal, correctAnswer: fb.correct, isCorrect: fb.isCorrect, timedOut: fb.timedOut,
     }])
-    if (answerIdx + 1 >= questions.length) {
-      setPhase('results')
-    } else {
-      setAnswerIdx(answerIdx + 1)
-    }
+    if (answerIdx + 1 >= questions.length) setPhase('results')
+    else setAnswerIdx(answerIdx + 1)
   }
 
   const handleSuddenSave = (text, answer) => {
@@ -961,7 +1116,6 @@ export default function App() {
     setPhase('sudden-create')
   }
 
-  // ----- Modo Colegio -----
   const startSchoolSetup = () => setPhase('school-config')
 
   const startSchoolQuiz = (cfg) => {
@@ -986,60 +1140,54 @@ export default function App() {
     const q = schoolQuestions[schoolIdx]
     if (fb.isCorrect) setSchoolScore((s) => s + 1)
     setSchoolDetail((d) => [...d, {
-      questionText: q.text,
-      guessVal: fb.guessVal,
-      correctAnswer: q.options[q.answer],
-      isCorrect: fb.isCorrect,
-      timedOut: fb.timedOut,
+      questionText: q.text, guessVal: fb.guessVal,
+      correctAnswer: q.options[q.answer], isCorrect: fb.isCorrect, timedOut: fb.timedOut,
     }])
-    if (schoolIdx + 1 >= schoolQuestions.length) {
-      setPhase('school-results')
-    } else {
-      setSchoolIdx(schoolIdx + 1)
-    }
+    if (schoolIdx + 1 >= schoolQuestions.length) setPhase('school-results')
+    else setSchoolIdx(schoolIdx + 1)
   }
 
   return (
-    <div className="min-h-screen px-4 py-8 sm:py-12 relative">
-      {/* Toggle modo oscuro/claro */}
+    <div className="relative min-h-dvh" style={{ background: 'var(--paper)' }}>
+      {/* Toggle tema: minimalista */}
       <button
         onClick={() => setDark(!dark)}
         aria-label="Cambiar tema"
-        className="btn-3d fixed top-4 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-200 bg-white text-2xl shadow-lg hover:scale-110 dark:border-slate-600 dark:bg-slate-800"
+        className="fixed top-4 right-4 z-50 flex h-10 w-10 items-center justify-center rounded-full text-lg transition-soft hover:scale-110"
+        style={{ background: 'var(--card)', border: '1px solid var(--line)', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
       >
         {dark ? '☀️' : '🌙'}
       </button>
 
-      <div className="mx-auto max-w-3xl">
+      <main className="mx-auto w-full max-w-xl px-5 pt-6 pb-10 sm:max-w-2xl sm:px-8 sm:pt-10 lg:max-w-5xl">
+        {/* Breadcrumb: sutil */}
         {phase !== 'home' && (
-          <div className="mb-5 flex items-center justify-center gap-2 text-sm font-black text-slate-400 dark:text-slate-500">
+          <nav className="mb-6 flex items-center gap-1.5 text-[0.7rem] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-faint)' }}>
             {phase.startsWith('school') ? (
               <>
-                <span className={phase === 'school-config' ? 'text-slate-800 dark:text-slate-100' : ''}>⚙️ Config</span>
+                <span style={{ color: phase === 'school-config' ? 'var(--ink)' : undefined }}>Nivel</span>
                 <span>›</span>
-                <span className={phase === 'school-quiz' ? 'text-slate-800 dark:text-slate-100' : ''}>🎓 Respondiendo</span>
+                <span style={{ color: phase === 'school-quiz' ? 'var(--ink)' : undefined }}>Preguntas</span>
                 <span>›</span>
-                <span className={phase === 'school-results' ? 'text-slate-800 dark:text-slate-100' : ''}>🏆 Resultado</span>
+                <span style={{ color: phase === 'school-results' ? 'var(--ink)' : undefined }}>Resultado</span>
               </>
             ) : (
               <>
-                <span className={phase === 'setup' ? 'text-slate-800 dark:text-slate-100' : ''}>⚙️ Config</span>
+                <span style={{ color: phase === 'setup' ? 'var(--ink)' : undefined }}>Config</span>
                 <span>›</span>
-                <span className={phase === 'create' || phase === 'sudden-create' ? 'text-slate-800 dark:text-slate-100' : ''}>✍️ Preguntas</span>
+                <span style={{ color: phase === 'create' || phase === 'sudden-create' ? 'var(--ink)' : undefined }}>Preguntan</span>
                 <span>›</span>
-                <span className={phase === 'answer' ? 'text-slate-800 dark:text-slate-100' : ''}>🤔 Respuestas</span>
+                <span style={{ color: phase === 'answer' ? 'var(--ink)' : undefined }}>Adivinan</span>
                 <span>›</span>
-                <span className={phase === 'results' ? 'text-slate-800 dark:text-slate-100' : ''}>🏆 Resultados</span>
+                <span style={{ color: phase === 'results' ? 'var(--ink)' : undefined }}>Resultado</span>
               </>
             )}
-          </div>
+          </nav>
         )}
 
         {phase === 'home' && <HomeScreen onStartFriends={startFriendsSetup} onStartSchool={startSchoolSetup} />}
 
-        {phase === 'setup' && (
-          <SetupScreen initial={config} onBack={() => setPhase('home')} onStart={startCreating} />
-        )}
+        {phase === 'setup' && <SetupScreen initial={config} onBack={() => setPhase('home')} onStart={startCreating} />}
 
         {phase === 'create' && questions.length < totalToCreate && (
           <CreateQuestionsScreen
@@ -1061,7 +1209,7 @@ export default function App() {
             otherName={suddenCreateIdx % 2 === 0 ? config.p2 : config.p1}
             current={suddenCreateIdx + 1}
             total={2}
-            roundLabel={`Muerte súbita ${suddenRounds} ⚡`}
+            roundLabel={`Muerte súbita ${suddenRounds}`}
             isSudden
             onSave={handleSuddenSave}
           />
@@ -1084,21 +1232,15 @@ export default function App() {
 
         {phase === 'results' && (
           <ResultsScreen
-            p1={config.p1}
-            p2={config.p2}
-            scores={scores}
-            detail={detail}
-            suddenEnabled={config.sudden}
-            suddenRounds={suddenRounds}
+            p1={config.p1} p2={config.p2} scores={scores} detail={detail}
+            suddenEnabled={config.sudden} suddenRounds={suddenRounds}
             onSuddenDeath={startSuddenDeath}
             onReplay={() => { resetGame(); setPhase('setup') }}
             onHome={() => { resetGame(); setPhase('home') }}
           />
         )}
 
-        {phase === 'school-config' && (
-          <SchoolConfigScreen onBack={() => setPhase('home')} onStart={startSchoolQuiz} />
-        )}
+        {phase === 'school-config' && <SchoolConfigScreen onBack={() => setPhase('home')} onStart={startSchoolQuiz} />}
 
         {phase === 'school-quiz' && schoolQuestions[schoolIdx] && (
           <SchoolQuizScreen
@@ -1126,10 +1268,10 @@ export default function App() {
           />
         )}
 
-        <footer className="mt-8 text-center text-sm font-bold text-slate-400 dark:text-slate-600">
-          Hecho con 💛 para saber si son Friend or Fake 🎭
+        <footer className="mt-12 pb-4 text-center text-xs font-semibold" style={{ color: 'var(--ink-faint)' }}>
+          Friend or Fake · Hecho para amigos 🎭
         </footer>
-      </div>
+      </main>
     </div>
   )
 }
