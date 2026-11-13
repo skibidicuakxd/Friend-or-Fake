@@ -13,17 +13,17 @@ function shuffle(arr) {
 
 // ---------- Primitivos UI ----------
 function Button({ children, onClick, variant = 'primary', className = '', disabled = false, type = 'button' }) {
-  const styles = {
-    primary: 'text-white',
-    secondary: 'border',
-    ghost: '',
-    coral: 'text-white',
+  const variants = {
+    primary: 'hover:brightness-110',
+    secondary: 'hover:bg-black/[0.04] dark:hover:bg-white/[0.06]',
+    ghost: 'hover:bg-black/[0.04] dark:hover:bg-white/[0.06]',
+    coral: 'hover:brightness-110',
   }
   const colors = {
-    primary: { background: 'var(--teal)', border: 'var(--teal-deep)' },
-    secondary: { background: 'transparent', border: 'var(--line)' },
-    ghost: { background: 'transparent', border: 'transparent' },
-    coral: { background: 'var(--coral)', border: 'var(--coral-deep)' },
+    primary: { background: 'var(--teal)', border: 'var(--teal-deep)', color: 'var(--on-accent)' },
+    secondary: { background: 'transparent', border: 'var(--line)', color: 'var(--ink)' },
+    ghost: { background: 'transparent', border: 'transparent', color: 'var(--ink)' },
+    coral: { background: 'var(--coral)', border: 'var(--coral-deep)', color: 'var(--on-coral)' },
   }
   const c = colors[variant] || colors.primary
   return (
@@ -31,12 +31,12 @@ function Button({ children, onClick, variant = 'primary', className = '', disabl
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className={`group relative w-full rounded-xl px-6 py-3.5 text-base font-bold tracking-wide transition-soft disabled:opacity-40 disabled:cursor-not-allowed ${styles[variant] || ''} ${className}`}
+      className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-base font-bold transition-soft active:translate-y-px disabled:cursor-not-allowed disabled:opacity-40 disabled:active:translate-y-0 ${variants[variant] || ''} ${className}`}
       style={{
         background: c.background,
-        border: `2px solid ${c.border}`,
-        borderBottomWidth: variant === 'ghost' ? '1px' : '3px',
-        ...(variant === 'primary' || variant === 'coral' ? { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : {}),
+        color: c.color,
+        border: `1px solid ${c.border}`,
+        boxShadow: variant === 'primary' || variant === 'coral' ? '0 1px 2px rgba(45,42,38,0.18)' : undefined,
       }}
     >
       {children}
@@ -44,15 +44,11 @@ function Button({ children, onClick, variant = 'primary', className = '', disabl
   )
 }
 
-function Panel({ children, className = '', accent = false }) {
+function Panel({ children, className = '' }) {
   return (
     <div
       className={`rounded-2xl p-6 sm:p-7 ${className}`}
-      style={{
-        background: 'var(--card)',
-        border: accent ? '2px solid var(--line)' : '1px solid var(--line)',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-      }}
+      style={{ background: 'var(--card)', border: '1px solid var(--line)' }}
     >
       {children}
     </div>
@@ -61,13 +57,15 @@ function Panel({ children, className = '', accent = false }) {
 
 function PlayerTag({ who, name }) {
   const isP1 = who === 'p1'
-  const bg = isP1 ? 'var(--teal)' : 'var(--coral)'
+  const tone = isP1 ? 'var(--teal-ink)' : 'var(--coral-ink)'
+  const soft = isP1 ? 'var(--teal-soft)' : 'var(--coral-soft)'
   return (
     <span
-      className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-bold text-white"
-      style={{ background: bg }}
+      className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-bold"
+      style={{ background: soft, color: tone }}
     >
-      {isP1 ? '●' : '●'} {name}
+      <span aria-hidden="true" className="h-2 w-2 rounded-full" style={{ background: tone }} />
+      {name}
     </span>
   )
 }
@@ -80,11 +78,28 @@ function SectionTitle({ children, className = '' }) {
   )
 }
 
-function Eyebrow({ children }) {
+function CheckIcon({ className = '' }) {
   return (
-    <span className="block text-[0.7rem] font-extrabold uppercase tracking-[0.15em]" style={{ color: 'var(--ink-faint)' }}>
-      {children}
-    </span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M4.5 12.5 9.5 17.5 19.5 6.5" />
+    </svg>
+  )
+}
+
+function CrossIcon({ className = '' }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M6 6l12 12M18 6L6 18" />
+    </svg>
+  )
+}
+
+function ClockIcon({ className = '' }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <circle cx="12" cy="12.5" r="8" />
+      <path d="M12 8.5v4.5l3 1.8" />
+    </svg>
   )
 }
 
@@ -94,7 +109,7 @@ function HomeScreen({ onStartFriends, onStartSchool }) {
     <div className="animate-fade-up mx-auto w-full max-w-lg space-y-10 lg:grid lg:max-w-4xl lg:grid-cols-2 lg:items-center lg:gap-12 lg:space-y-0">
       {/* Logo: más personal, menos genérico */}
       <div className="text-center pt-4 lg:text-left">
-        <div className="animate-gentle-bounce inline-block mb-5 text-5xl select-none">🎭</div>
+        <div className="mb-5 text-5xl select-none" aria-hidden="true">🎭</div>
         <h1 className="text-[2.6rem] sm:text-[3.4rem] font-extrabold leading-[1.05] tracking-tight" style={{ color: 'var(--ink)' }}>
           Friend<br />
           <span style={{ color: 'var(--teal)' }}>or</span>{' '}
@@ -103,52 +118,53 @@ function HomeScreen({ onStartFriends, onStartSchool }) {
         <p className="mt-3 text-base font-semibold" style={{ color: 'var(--ink-soft)' }}>
           ¿Realmente se conocen?
         </p>
-        <p className="mt-8 hidden text-sm font-semibold lg:block" style={{ color: 'var(--ink-faint)' }}>
-          Pásense el teléfono. No miren las respuestas. 🙈
-        </p>
       </div>
 
       {/* Modos: más peso visual, sin tarjetas genéricas */}
       <div className="space-y-3">
-        <Eyebrow>Elige cómo jugar</Eyebrow>
+        <SectionTitle>Dos formas de jugar</SectionTitle>
         <button
           onClick={onStartFriends}
-          className="group w-full rounded-2xl p-5 text-left transition-soft hover:translate-y-[-1px]"
-          style={{ background: 'var(--teal-soft)', border: '2px solid var(--teal)', borderBottomWidth: '4px' }}
+          className="group w-full rounded-2xl p-5 text-left transition-soft hover:-translate-y-0.5"
+          style={{ background: 'var(--teal-soft)', border: '1px solid var(--teal)' }}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <div className="text-xl font-extrabold" style={{ color: 'var(--ink)' }}>👯 Modo Amigos</div>
+              <div className="text-xl font-extrabold" style={{ color: 'var(--ink)' }}>
+                <span aria-hidden="true">👯</span> Modo Amigos
+              </div>
               <div className="mt-0.5 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
                 Se preguntan entre sí y adivinan
               </div>
             </div>
             <span
-              className="shrink-0 rounded-full px-4 py-2 text-sm font-extrabold text-white transition-soft group-hover:scale-105"
-              style={{ background: 'var(--teal)' }}
+              className="shrink-0 rounded-full px-4 py-2 text-sm font-extrabold"
+              style={{ background: 'var(--teal)', color: 'var(--on-accent)' }}
             >
-              Jugar →
+              Jugar
             </span>
           </div>
         </button>
 
         <button
           onClick={onStartSchool}
-          className="group w-full rounded-2xl p-5 text-left transition-soft hover:translate-y-[-1px]"
-          style={{ background: 'var(--coral-soft)', border: '2px solid var(--coral)', borderBottomWidth: '4px' }}
+          className="group w-full rounded-2xl p-5 text-left transition-soft hover:-translate-y-0.5"
+          style={{ background: 'var(--coral-soft)', border: '1px solid var(--coral)' }}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <div className="text-xl font-extrabold" style={{ color: 'var(--ink)' }}>🎒 Preguntas del cole</div>
+              <div className="text-xl font-extrabold" style={{ color: 'var(--ink)' }}>
+                <span aria-hidden="true">🎒</span> Preguntas del cole
+              </div>
               <div className="mt-0.5 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
-                180 preguntas • 3 niveles • 4 materias
+                180 preguntas, 3 niveles y 4 materias
               </div>
             </div>
             <span
-              className="shrink-0 rounded-full px-4 py-2 text-sm font-extrabold text-white transition-soft group-hover:scale-105"
-              style={{ background: 'var(--coral)' }}
+              className="shrink-0 rounded-full px-4 py-2 text-sm font-extrabold"
+              style={{ background: 'var(--coral)', color: 'var(--on-coral)' }}
             >
-              Jugar →
+              Jugar
             </span>
           </div>
         </button>
@@ -156,7 +172,7 @@ function HomeScreen({ onStartFriends, onStartSchool }) {
 
       {/* Cómo se juega: más sutil, sin tarjetas */}
       <div style={{ borderTop: '1px solid var(--line)' }} className="pt-6 lg:col-span-2 lg:mt-4">
-        <Eyebrow>Cómo funciona</Eyebrow>
+        <h2 className="text-lg font-extrabold" style={{ color: 'var(--ink)' }}>Cómo se juega</h2>
         <ol className="mt-3 space-y-3">
           {[
             { icon: '✍️', title: 'Preguntan', desc: 'Cada uno escribe sus preguntas secretas' },
@@ -164,11 +180,11 @@ function HomeScreen({ onStartFriends, onStartSchool }) {
             { icon: '🏆', title: 'Comparan', desc: '1 punto por acierto. Gana quien más sepa' },
           ].map((step, i) => (
             <li key={i} className="flex items-start gap-3.5">
-              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-extrabold" style={{ background: 'var(--gold-soft)', color: 'var(--gold)' }}>
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-extrabold tabular-nums" style={{ background: 'var(--gold-soft)', color: 'var(--ink)' }}>
                 {i + 1}
               </span>
               <div>
-                <span className="font-extrabold" style={{ color: 'var(--ink)' }}>{step.icon} {step.title}</span>
+                <span className="font-extrabold" style={{ color: 'var(--ink)' }}><span aria-hidden="true">{step.icon}</span> {step.title}</span>
                 <span className="ml-1.5 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>{step.desc}</span>
               </div>
             </li>
@@ -176,8 +192,8 @@ function HomeScreen({ onStartFriends, onStartSchool }) {
         </ol>
       </div>
 
-      <p className="text-center text-xs font-semibold pb-4 lg:hidden" style={{ color: 'var(--ink-faint)' }}>
-        Pásense el teléfono. No miren las respuestas. 🙈
+      <p className="text-center text-xs font-semibold pb-4" style={{ color: 'var(--ink-faint)' }}>
+        Pásense el teléfono. No miren las respuestas. <span aria-hidden="true">🙈</span>
       </p>
     </div>
   )
@@ -196,7 +212,7 @@ function SetupScreen({ initial, onBack, onStart }) {
   return (
     <div className="animate-fade-up mx-auto w-full max-w-lg space-y-8 lg:max-w-3xl">
       <div>
-        <button onClick={onBack} className="mb-4 text-sm font-bold transition-soft hover:opacity-70" style={{ color: 'var(--ink-soft)' }}>
+        <button onClick={onBack} className="mb-4 inline-flex min-h-11 items-center text-sm font-bold transition-soft hover:opacity-70" style={{ color: 'var(--ink-soft)' }}>
           ← Volver
         </button>
         <SectionTitle>Configura la partida</SectionTitle>
@@ -209,25 +225,27 @@ function SetupScreen({ initial, onBack, onStart }) {
       {/* Nombres: sin cajas de color, más limpio */}
       <div className="space-y-4">
         <div>
-          <Eyebrow>Jugador 1</Eyebrow>
+          <label htmlFor="player-1" className="block text-sm font-bold" style={{ color: 'var(--ink)' }}>Jugador 1</label>
           <input
+            id="player-1"
             value={p1}
             onChange={(e) => setP1(e.target.value)}
             maxLength={20}
             placeholder="Nombre"
             className="mt-1.5 w-full rounded-xl px-4 py-3 text-lg font-bold transition-soft"
-            style={{ background: 'var(--card)', border: '2px solid var(--line)', color: 'var(--ink)' }}
+            style={{ background: 'var(--card)', border: '1px solid var(--line)', color: 'var(--ink)' }}
           />
         </div>
         <div>
-          <Eyebrow>Jugador 2</Eyebrow>
+          <label htmlFor="player-2" className="block text-sm font-bold" style={{ color: 'var(--ink)' }}>Jugador 2</label>
           <input
+            id="player-2"
             value={p2}
             onChange={(e) => setP2(e.target.value)}
             maxLength={20}
             placeholder="Nombre"
             className="mt-1.5 w-full rounded-xl px-4 py-3 text-lg font-bold transition-soft"
-            style={{ background: 'var(--card)', border: '2px solid var(--line)', color: 'var(--ink)' }}
+            style={{ background: 'var(--card)', border: '1px solid var(--line)', color: 'var(--ink)' }}
           />
         </div>
       </div>
@@ -237,7 +255,7 @@ function SetupScreen({ initial, onBack, onStart }) {
       <div>
         <div className="flex items-baseline justify-between">
           <span className="font-bold" style={{ color: 'var(--ink)' }}>Rondas por jugador</span>
-          <span className="text-2xl font-extrabold" style={{ color: 'var(--teal)' }}>{rounds}</span>
+          <span className="text-2xl font-extrabold tabular-nums" style={{ color: 'var(--teal)' }}>{rounds}</span>
         </div>
         <input
           type="range" min={1} max={10} value={rounds}
@@ -257,20 +275,19 @@ function SetupScreen({ initial, onBack, onStart }) {
         <div className="flex items-center justify-between">
           <span className="font-bold" style={{ color: 'var(--ink)' }}>Tiempo por respuesta</span>
           <div className="flex items-center gap-3">
-            <span className="text-xl font-extrabold" style={{ color: 'var(--teal)' }}>{noLimit ? '∞' : `${timer}s`}</span>
-            <label className="flex cursor-pointer items-center gap-1.5 text-sm font-bold" style={{ color: 'var(--ink-soft)' }}>
-              <input type="checkbox" checked={noLimit} onChange={(e) => setNoLimit(e.target.checked)} className="h-4 w-4" />
+            <span className="text-xl font-extrabold tabular-nums" style={{ color: 'var(--teal)' }}>{noLimit ? 'Sin límite' : `${timer}s`}</span>
+            <label className="flex min-h-11 cursor-pointer items-center gap-1.5 text-sm font-bold" style={{ color: 'var(--ink-soft)' }}>
+              <input type="checkbox" checked={noLimit} onChange={(e) => setNoLimit(e.target.checked)} className="h-6 w-6" />
               Sin límite
             </label>
           </div>
         </div>
-        {!noLimit && (
-          <input
-            type="range" min={5} max={60} step={5} value={timer}
-            onChange={(e) => setTimer(Number(e.target.value))}
-            className="mt-3 w-full"
-          />
-        )}
+        <input
+          type="range" min={5} max={60} step={5} value={timer} disabled={noLimit}
+          onChange={(e) => setTimer(Number(e.target.value))}
+          className="mt-3 w-full"
+          aria-label="Segundos por respuesta"
+        />
         <p className="mt-1 text-xs font-semibold" style={{ color: 'var(--ink-faint)' }}>
           Si se acaba el tiempo: 0 puntos y sigue.
         </p>
@@ -280,17 +297,19 @@ function SetupScreen({ initial, onBack, onStart }) {
       <div className="flex items-center justify-between rounded-xl p-4" style={{ background: 'var(--gold-soft)', border: '1px solid var(--gold)' }}>
         <div>
           <div className="font-extrabold" style={{ color: 'var(--ink)' }}>⚡ Muerte súbita</div>
-          <div className="text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>1 pregunta extra si empatan</div>
+          <div className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>1 pregunta extra si empatan</div>
         </div>
         <button
           onClick={() => setSudden(!sudden)}
-          className="relative h-7 w-12 rounded-full transition-soft"
+          role="switch"
+          aria-checked={sudden}
+          aria-label="Muerte súbita"
+          className="relative h-10 w-16 shrink-0 rounded-full transition-soft"
           style={{ background: sudden ? 'var(--teal)' : 'var(--line)' }}
-          aria-label="muerte subita"
         >
           <span
-            className="absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-sm transition-all"
-            style={{ left: sudden ? 'calc(100% - 1.375rem)' : '0.125rem' }}
+            className="absolute top-1 h-8 w-8 rounded-full bg-white shadow-sm transition-all"
+            style={{ left: sudden ? 'calc(100% - 2.25rem)' : '0.25rem' }}
           />
         </button>
       </div>
@@ -299,7 +318,7 @@ function SetupScreen({ initial, onBack, onStart }) {
 
       <div className="space-y-2 pb-6">
         <Button variant="primary" disabled={!canStart} onClick={() => onStart({ p1: p1.trim() || 'Persona 1', p2: p2.trim() || 'Persona 2', rounds, timer, noLimit, sudden })}>
-          ¡A preguntar! →
+          ¡A preguntar!
         </Button>
         {!canStart && (
           <p className="text-center text-sm font-bold" style={{ color: 'var(--coral)' }}>
@@ -311,7 +330,7 @@ function SetupScreen({ initial, onBack, onStart }) {
   )
 }
 
-function CreateQuestionsScreen({ authorName, otherName, authorKey, current, total, roundLabel, isSudden, onSave }) {
+function CreateQuestionsScreen({ authorName, otherName, authorKey, current, total, roundLabel, onSave }) {
   const [q, setQ] = useState('')
   const [a, setA] = useState('')
   const canSave = q.trim().length >= 3 && a.trim().length >= 1
@@ -328,41 +347,44 @@ function CreateQuestionsScreen({ authorName, otherName, authorKey, current, tota
   return (
     <div className="animate-fade-up mx-auto w-full max-w-lg space-y-6 sm:max-w-xl">
       <div className="text-center">
-        <Eyebrow>{roundLabel} {isSudden && '· Muerte súbita'}</Eyebrow>
-        <h2 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: 'var(--ink)' }}>
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: 'var(--ink)' }}>
           Turno de {authorName}
         </h2>
-        <div className="mt-3 inline-block rounded-xl px-4 py-2.5 text-sm font-bold" style={{ background: 'var(--gold-soft)', color: 'var(--ink)', border: '1px solid var(--gold)' }}>
-          📱 Pasa el teléfono a {authorName}. {otherName}, no mires.
-        </div>
+        <p className="mt-2 inline-block rounded-xl px-4 py-2.5 text-sm font-bold" style={{ background: 'var(--gold-soft)', color: 'var(--ink)', border: '1px solid var(--gold)' }}>
+          <span aria-hidden="true">📱</span> Pasa el teléfono a {authorName}. {otherName}, no mires.
+        </p>
       </div>
 
       <Panel>
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between gap-3">
           <PlayerTag who={authorKey} name={authorName} />
-          <span className="text-sm font-bold" style={{ color: 'var(--ink-faint)' }}>{current}/{total}</span>
+          <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--ink-soft)' }}>
+            {roundLabel} ({current}/{total})
+          </span>
         </div>
 
-        <label className="block text-sm font-extrabold" style={{ color: 'var(--ink)' }}>Pregunta</label>
+        <label htmlFor="question-text" className="block text-sm font-bold" style={{ color: 'var(--ink)' }}>Pregunta</label>
         <input
+          id="question-text"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="¿Cuál es mi color favorito?"
           maxLength={120}
           className="mt-1.5 w-full rounded-xl px-4 py-3 text-base font-semibold transition-soft"
-          style={{ background: 'var(--paper)', border: '2px solid var(--line)', color: 'var(--ink)' }}
+          style={{ background: 'var(--paper)', border: '1px solid var(--line)', color: 'var(--ink)' }}
         />
 
-        <label className="mt-4 block text-sm font-extrabold" style={{ color: 'var(--ink)' }}>
-          Respuesta secreta 🔒
+        <label htmlFor="secret-answer" className="mt-4 block text-sm font-bold" style={{ color: 'var(--ink)' }}>
+          Respuesta secreta <span aria-hidden="true">🔒</span>
         </label>
         <input
+          id="secret-answer"
           value={a}
           onChange={(e) => setA(e.target.value)}
           placeholder="Azul"
           maxLength={80}
           className="mt-1.5 w-full rounded-xl px-4 py-3 text-base font-semibold transition-soft"
-          style={{ background: 'var(--paper)', border: '2px solid var(--line)', color: 'var(--ink)' }}
+          style={{ background: 'var(--paper)', border: '1px solid var(--line)', color: 'var(--ink)' }}
         />
         <p className="mt-2 text-xs font-semibold" style={{ color: 'var(--ink-faint)' }}>
           Se ignora mayúsculas y tildes: "Azúl" = "azul"
@@ -370,7 +392,7 @@ function CreateQuestionsScreen({ authorName, otherName, authorKey, current, tota
 
         <div className="mt-5">
           <Button variant={authorKey === 'p1' ? 'primary' : 'coral'} disabled={!canSave} onClick={handle}>
-            Guardar ({current}/{total}) →
+            Guardar pregunta
           </Button>
         </div>
 
@@ -420,12 +442,11 @@ function AnswerScreen({ question, guesserName, authorName, guesserKey, qNumber, 
   return (
     <div className="animate-fade-up mx-auto w-full max-w-lg space-y-5 sm:max-w-xl">
       <div className="text-center">
-        <Eyebrow>Respondiendo {qNumber}/{qTotal}</Eyebrow>
-        <h2 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: 'var(--ink)' }}>
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: 'var(--ink)' }}>
           ¡Adivina, {guesserName}!
         </h2>
         <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
-          Pregunta de {authorName} · +1 punto si aciertas
+          Pregunta {qNumber} de {qTotal}. La escribió {authorName}. +1 punto si aciertas.
         </p>
       </div>
 
@@ -433,8 +454,8 @@ function AnswerScreen({ question, guesserName, authorName, guesserKey, qNumber, 
       {!noLimit && !feedback && (
         <div className={`rounded-xl px-4 py-3 ${danger ? 'animate-timer-danger' : ''}`} style={{ background: danger ? 'var(--coral-soft)' : 'var(--card)', border: `1px solid ${danger ? 'var(--coral)' : 'var(--line)'}` }}>
           <div className="flex items-center justify-between text-sm font-extrabold">
-            <span style={{ color: danger ? 'var(--coral)' : 'var(--ink)' }}>{left}s</span>
-            <span style={{ color: danger ? 'var(--coral)' : 'var(--ink-faint)' }}>{danger ? '¡Corre!' : 'Tú puedes'}</span>
+            <span className="tabular-nums" style={{ color: danger ? 'var(--coral)' : 'var(--ink)' }}>{left}s</span>
+            <span style={{ color: danger ? 'var(--coral)' : 'var(--ink-soft)' }}>{danger ? '¡Corre!' : 'Tú puedes'}</span>
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full" style={{ background: 'var(--line)' }}>
             <div
@@ -458,8 +479,9 @@ function AnswerScreen({ question, guesserName, authorName, guesserKey, qNumber, 
 
         {!feedback ? (
           <div className="mt-5">
-            <label className="block text-sm font-extrabold" style={{ color: 'var(--ink)' }}>Tu respuesta</label>
+            <label htmlFor="guess" className="block text-sm font-bold" style={{ color: 'var(--ink)' }}>Tu respuesta</label>
             <input
+              id="guess"
               value={guess}
               onChange={(e) => setGuess(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') submit() }}
@@ -467,16 +489,18 @@ function AnswerScreen({ question, guesserName, authorName, guesserKey, qNumber, 
               maxLength={80}
               autoFocus
               className="mt-1.5 w-full rounded-xl px-4 py-3 text-base font-semibold transition-soft"
-              style={{ background: 'var(--paper)', border: '2px solid var(--line)', color: 'var(--ink)' }}
+              style={{ background: 'var(--paper)', border: '1px solid var(--line)', color: 'var(--ink)' }}
             />
             <div className="mt-4">
               <Button variant="primary" disabled={guess.trim().length === 0} onClick={submit}>
-                Responder →
+                Responder
               </Button>
             </div>
           </div>
         ) : (
           <div
+            role="status"
+            aria-live="polite"
             className="animate-fade-up mt-5 rounded-xl p-5 text-center"
             style={{
               background: feedback.isCorrect ? 'var(--leaf-soft)' : 'var(--coral-soft)',
@@ -485,7 +509,7 @@ function AnswerScreen({ question, guesserName, authorName, guesserKey, qNumber, 
           >
             {feedback.timedOut ? (
               <>
-                <div className="text-4xl">⏰</div>
+                <ClockIcon className="mx-auto h-10 w-10" />
                 <div className="mt-2 text-xl font-extrabold" style={{ color: 'var(--ink)' }}>Tiempo agotado</div>
                 <div className="mt-1 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
                   Era: <b style={{ color: 'var(--ink)' }}>"{feedback.correct}"</b>
@@ -493,12 +517,16 @@ function AnswerScreen({ question, guesserName, authorName, guesserKey, qNumber, 
               </>
             ) : feedback.isCorrect ? (
               <>
-                <div className="animate-score-pop text-4xl">✓</div>
+                <div className="animate-score-pop" style={{ color: 'var(--leaf)' }}>
+                  <CheckIcon className="mx-auto h-10 w-10" />
+                </div>
                 <div className="mt-2 text-xl font-extrabold" style={{ color: 'var(--leaf)' }}>¡Correcto! +1 punto</div>
               </>
             ) : (
               <>
-                <div className="text-4xl">✗</div>
+                <div style={{ color: 'var(--coral)' }}>
+                  <CrossIcon className="mx-auto h-10 w-10" />
+                </div>
                 <div className="mt-2 text-xl font-extrabold" style={{ color: 'var(--ink)' }}>Era: "{feedback.correct}"</div>
                 <div className="mt-1 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
                   Dijiste: "{feedback.guessVal}"
@@ -507,7 +535,7 @@ function AnswerScreen({ question, guesserName, authorName, guesserKey, qNumber, 
             )}
             <div className="mt-4">
               <Button variant={feedback.isCorrect ? 'primary' : 'secondary'} onClick={() => onAnswer(feedback)}>
-                {qNumber === qTotal ? 'Ver resultados' : 'Siguiente →'}
+                {qNumber === qTotal ? 'Ver resultados' : 'Siguiente'}
               </Button>
             </div>
           </div>
@@ -537,24 +565,24 @@ function ResultsScreen({ p1, p2, scores, detail, suddenEnabled, suddenRounds, on
               : 'Son igual de amigos (o de fakes)'}
         </p>
         {suddenRounds > 0 && (
-          <p className="mt-2 inline-block rounded-full px-3 py-1 text-xs font-extrabold" style={{ background: 'var(--gold-soft)', color: 'var(--gold)', border: '1px solid var(--gold)' }}>
-            ⚡ {suddenRounds} rondas de muerte súbita
+          <p className="mt-2 inline-block rounded-full px-3 py-1 text-xs font-extrabold" style={{ background: 'var(--gold-soft)', color: 'var(--ink)', border: '1px solid var(--gold)' }}>
+            <span aria-hidden="true">⚡</span> {suddenRounds} rondas de muerte súbita
           </p>
         )}
       </div>
 
       {/* Puntajes: más impacto visual */}
       <div className="flex items-stretch gap-3">
-        <div className="flex-1 rounded-2xl p-5 text-center" style={{ background: 'var(--teal-soft)', border: '2px solid var(--teal)' }}>
-          <div className="text-xs font-extrabold uppercase tracking-wider" style={{ color: 'var(--teal)' }}>{p1}</div>
-          <div className="animate-score-pop mt-1 text-5xl font-extrabold" style={{ color: 'var(--teal)' }}>{scores.p1}</div>
+        <div className="flex-1 rounded-2xl p-5 text-center" style={{ background: 'var(--teal-soft)', border: '1px solid var(--teal)' }}>
+          <div className="truncate text-sm font-extrabold" style={{ color: 'var(--teal-ink)' }}>{p1}</div>
+          <div className="animate-score-pop mt-1 text-5xl font-extrabold tabular-nums" style={{ color: 'var(--teal-ink)' }}>{scores.p1}</div>
         </div>
         <div className="flex items-center px-1">
-          <span className="text-lg font-extrabold" style={{ color: 'var(--ink-faint)' }}>vs</span>
+          <span className="text-sm font-extrabold" style={{ color: 'var(--ink-faint)' }}>vs</span>
         </div>
-        <div className="flex-1 rounded-2xl p-5 text-center" style={{ background: 'var(--coral-soft)', border: '2px solid var(--coral)' }}>
-          <div className="text-xs font-extrabold uppercase tracking-wider" style={{ color: 'var(--coral)' }}>{p2}</div>
-          <div className="animate-score-pop mt-1 text-5xl font-extrabold" style={{ color: 'var(--coral)' }}>{scores.p2}</div>
+        <div className="flex-1 rounded-2xl p-5 text-center" style={{ background: 'var(--coral-soft)', border: '1px solid var(--coral)' }}>
+          <div className="truncate text-sm font-extrabold" style={{ color: 'var(--coral-ink)' }}>{p2}</div>
+          <div className="animate-score-pop mt-1 text-5xl font-extrabold tabular-nums" style={{ color: 'var(--coral-ink)' }}>{scores.p2}</div>
         </div>
       </div>
 
@@ -571,7 +599,7 @@ function ResultsScreen({ p1, p2, scores, detail, suddenEnabled, suddenRounds, on
       </div>
 
       {!winner && suddenEnabled && (
-        <Button variant="coral" onClick={onSuddenDeath}>⚡ Muerte súbita — 1 pregunta extra</Button>
+        <Button variant="coral" onClick={onSuddenDeath}><span aria-hidden="true">⚡</span> Muerte súbita: 1 pregunta extra</Button>
       )}
 
       <div className="grid gap-2 sm:grid-cols-2">
@@ -581,7 +609,7 @@ function ResultsScreen({ p1, p2, scores, detail, suddenEnabled, suddenRounds, on
 
       {/* Detalle: más limpio, sin bordes pesados */}
       <div>
-        <Eyebrow>Detalle</Eyebrow>
+        <h3 className="text-base font-extrabold" style={{ color: 'var(--ink)' }}>Detalle</h3>
         <div className="mt-3 grid gap-2 lg:grid-cols-2">
           {detail.map((d, i) => (
             <div
@@ -596,12 +624,17 @@ function ResultsScreen({ p1, p2, scores, detail, suddenEnabled, suddenRounds, on
                 <span className="text-sm font-bold" style={{ color: 'var(--ink)' }}>
                   {i + 1}. "{d.questionText}"
                 </span>
-                <span className="shrink-0 text-sm font-extrabold" style={{ color: d.isCorrect ? 'var(--leaf)' : 'var(--coral)' }}>
-                  {d.isCorrect ? '✓' : d.timedOut ? '⏰' : '✗'}
+                <span className="shrink-0" style={{ color: d.isCorrect ? 'var(--leaf)' : 'var(--coral)' }}>
+                  {d.isCorrect
+                    ? <CheckIcon className="h-4 w-4" />
+                    : d.timedOut
+                      ? <ClockIcon className="h-4 w-4" />
+                      : <CrossIcon className="h-4 w-4" />}
+                  <span className="sr-only">{d.isCorrect ? 'Correcto' : d.timedOut ? 'Se acabó el tiempo' : 'Incorrecto'}</span>
                 </span>
               </div>
               <div className="mt-1 text-xs font-semibold" style={{ color: 'var(--ink-soft)' }}>
-                {d.author === 'p1' ? p1 : p2} preguntó · {d.guesser === 'p1' ? p1 : p2} dijo "{d.guess || '—'}" · Era "{d.correctAnswer}"
+                {d.author === 'p1' ? p1 : p2} preguntó. {d.guesser === 'p1' ? p1 : p2} dijo "{d.guess || '—'}". Era "{d.correctAnswer}".
               </div>
             </div>
           ))}
@@ -641,14 +674,14 @@ function SchoolConfigScreen({ onBack, onStart }) {
   return (
     <div className="animate-fade-up mx-auto w-full max-w-lg space-y-7 lg:max-w-3xl">
       <div>
-        <button onClick={onBack} className="mb-4 text-sm font-bold transition-soft hover:opacity-70" style={{ color: 'var(--ink-soft)' }}>
+        <button onClick={onBack} className="mb-4 inline-flex min-h-11 items-center text-sm font-bold transition-soft hover:opacity-70" style={{ color: 'var(--ink-soft)' }}>
           ← Volver
         </button>
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: 'var(--ink)' }}>
           🎒 Preguntas del Cole
         </h2>
         <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
-          180 preguntas de Ecuador · 4 materias · 3 niveles
+          180 preguntas de Ecuador, 4 materias y 3 niveles
         </p>
       </div>
 
@@ -656,19 +689,20 @@ function SchoolConfigScreen({ onBack, onStart }) {
       <div className="space-y-7">
       {/* Sección */}
       <div>
-        <Eyebrow>Nivel</Eyebrow>
-        <div className="mt-2 grid grid-cols-3 gap-2">
+        <p id="nivel-label" className="text-sm font-bold" style={{ color: 'var(--ink)' }}>Nivel</p>
+        <div className="mt-2 grid grid-cols-3 gap-2" role="group" aria-labelledby="nivel-label">
           {SECTIONS.map((s) => (
             <button
               key={s.id}
               onClick={() => pickSection(s.id)}
+              aria-pressed={sectionId === s.id}
               className="rounded-xl p-3 text-center transition-soft"
               style={{
                 background: sectionId === s.id ? 'var(--teal-soft)' : 'var(--card)',
-                border: `2px solid ${sectionId === s.id ? 'var(--teal)' : 'var(--line)'}`,
+                border: `1px solid ${sectionId === s.id ? 'var(--teal)' : 'var(--line)'}`,
               }}
             >
-              <div className="text-2xl">{s.emoji}</div>
+              <div className="text-2xl" aria-hidden="true">{s.emoji}</div>
               <div className="mt-1 text-sm font-extrabold" style={{ color: 'var(--ink)' }}>{s.name}</div>
               <div className="text-[0.65rem] font-bold" style={{ color: 'var(--ink-faint)' }}>{s.level}</div>
             </button>
@@ -679,14 +713,15 @@ function SchoolConfigScreen({ onBack, onStart }) {
       {/* Materia */}
       {section && (
         <div>
-          <Eyebrow>Materia</Eyebrow>
-          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <p id="materia-label" className="text-sm font-bold" style={{ color: 'var(--ink)' }}>Materia</p>
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3" role="group" aria-labelledby="materia-label">
             <button
               onClick={() => pickSubject(null)}
+              aria-pressed={subjectName === null}
               className="rounded-xl px-3 py-2.5 text-sm font-bold transition-soft"
               style={{
                 background: subjectName === null ? 'var(--coral-soft)' : 'var(--card)',
-                border: `2px solid ${subjectName === null ? 'var(--coral)' : 'var(--line)'}`,
+                border: `1px solid ${subjectName === null ? 'var(--coral)' : 'var(--line)'}`,
               }}
             >
               🎲 Todas
@@ -695,10 +730,11 @@ function SchoolConfigScreen({ onBack, onStart }) {
               <button
                 key={sub.name}
                 onClick={() => pickSubject(sub.name)}
+                aria-pressed={subjectName === sub.name}
                 className="rounded-xl px-3 py-2.5 text-sm font-bold transition-soft"
                 style={{
                   background: subjectName === sub.name ? 'var(--coral-soft)' : 'var(--card)',
-                  border: `2px solid ${subjectName === sub.name ? 'var(--coral)' : 'var(--line)'}`,
+                  border: `1px solid ${subjectName === sub.name ? 'var(--coral)' : 'var(--line)'}`,
                 }}
               >
                 {sub.emoji} {sub.name}
@@ -716,7 +752,7 @@ function SchoolConfigScreen({ onBack, onStart }) {
         <div>
           <div className="flex items-baseline justify-between">
             <span className="font-bold" style={{ color: 'var(--ink)' }}>Cantidad de preguntas</span>
-            <span className="text-2xl font-extrabold" style={{ color: 'var(--teal)' }}>{qCount}</span>
+            <span className="text-2xl font-extrabold tabular-nums" style={{ color: 'var(--teal)' }}>{qCount}</span>
           </div>
           <input
             type="range" min={1} max={maxQ} value={qCount}
@@ -733,51 +769,52 @@ function SchoolConfigScreen({ onBack, onStart }) {
           <div className="flex items-center justify-between">
             <span className="font-bold" style={{ color: 'var(--ink)' }}>Tiempo por pregunta</span>
             <div className="flex items-center gap-3">
-              <span className="text-xl font-extrabold" style={{ color: 'var(--teal)' }}>{noLimit ? '∞' : `${timer}s`}</span>
-              <label className="flex cursor-pointer items-center gap-1.5 text-sm font-bold" style={{ color: 'var(--ink-soft)' }}>
-                <input type="checkbox" checked={noLimit} onChange={(e) => setNoLimit(e.target.checked)} className="h-4 w-4" />
+              <span className="text-xl font-extrabold tabular-nums" style={{ color: 'var(--teal)' }}>{noLimit ? 'Sin límite' : `${timer}s`}</span>
+              <label className="flex min-h-11 cursor-pointer items-center gap-1.5 text-sm font-bold" style={{ color: 'var(--ink-soft)' }}>
+                <input type="checkbox" checked={noLimit} onChange={(e) => setNoLimit(e.target.checked)} className="h-6 w-6" />
                 Sin límite
               </label>
             </div>
           </div>
-          {!noLimit && (
-            <input
-              type="range" min={5} max={60} step={5} value={timer}
-              onChange={(e) => setTimer(Number(e.target.value))}
-              className="mt-3 w-full"
-            />
-          )}
+          <input
+            type="range" min={5} max={60} step={5} value={timer} disabled={noLimit}
+            onChange={(e) => setTimer(Number(e.target.value))}
+            className="mt-3 w-full"
+            aria-label="Segundos por pregunta"
+          />
         </div>
       )}
 
       {/* Tipo respuesta */}
       {section && (
         <div>
-          <Eyebrow>Tipo de respuesta</Eyebrow>
-          <div className="mt-2 grid grid-cols-2 gap-2">
+          <p id="tipo-label" className="text-sm font-bold" style={{ color: 'var(--ink)' }}>Tipo de respuesta</p>
+          <div className="mt-2 grid grid-cols-2 gap-2" role="group" aria-labelledby="tipo-label">
             <button
               onClick={() => setMode('options')}
+              aria-pressed={mode === 'options'}
               className="rounded-xl p-4 text-center transition-soft"
               style={{
                 background: mode === 'options' ? 'var(--teal-soft)' : 'var(--card)',
-                border: `2px solid ${mode === 'options' ? 'var(--teal)' : 'var(--line)'}`,
+                border: `1px solid ${mode === 'options' ? 'var(--teal)' : 'var(--line)'}`,
               }}
             >
-              <div className="text-2xl">🔘</div>
+              <div className="text-2xl" aria-hidden="true">🔘</div>
               <div className="mt-1 font-extrabold" style={{ color: 'var(--ink)' }}>Opción múltiple</div>
-              <div className="text-xs font-semibold" style={{ color: 'var(--ink-faint)' }}>Elige A, B o C</div>
+              <div className="text-xs font-semibold" style={{ color: 'var(--ink-soft)' }}>Elige A, B o C</div>
             </button>
             <button
               onClick={() => setMode('written')}
+              aria-pressed={mode === 'written'}
               className="rounded-xl p-4 text-center transition-soft"
               style={{
                 background: mode === 'written' ? 'var(--teal-soft)' : 'var(--card)',
-                border: `2px solid ${mode === 'written' ? 'var(--teal)' : 'var(--line)'}`,
+                border: `1px solid ${mode === 'written' ? 'var(--teal)' : 'var(--line)'}`,
               }}
             >
-              <div className="text-2xl">✍️</div>
+              <div className="text-2xl" aria-hidden="true">✍️</div>
               <div className="mt-1 font-extrabold" style={{ color: 'var(--ink)' }}>Escribir</div>
-              <div className="text-xs font-semibold" style={{ color: 'var(--ink-faint)' }}>Escribe la respuesta</div>
+              <div className="text-xs font-semibold" style={{ color: 'var(--ink-soft)' }}>Escribe la respuesta</div>
             </button>
           </div>
         </div>
@@ -787,11 +824,11 @@ function SchoolConfigScreen({ onBack, onStart }) {
 
       <div className="pb-6">
         <Button variant="primary" disabled={!canStart} onClick={() => onStart({ sectionId, subjectName, qCount, timer, noLimit, mode })}>
-          ¡Empezar! →
+          ¡Empezar!
         </Button>
         {!section && (
-          <p className="mt-2 text-center text-sm font-bold" style={{ color: 'var(--ink-faint)' }}>
-            Selecciona un nivel arriba
+          <p className="mt-2 text-center text-sm font-bold" style={{ color: 'var(--ink-soft)' }}>
+            Elige un nivel para empezar
           </p>
         )}
       </div>
@@ -839,9 +876,17 @@ function SchoolQuizScreen({ question, qNumber, qTotal, timerSeconds, noLimit, mo
   return (
     <div className="animate-fade-up mx-auto w-full max-w-lg space-y-5 sm:max-w-xl">
       <div className="text-center">
-        <Eyebrow>Pregunta {qNumber}/{qTotal}</Eyebrow>
+        <p className="text-sm font-bold tabular-nums" style={{ color: 'var(--ink-soft)' }}>Pregunta {qNumber} de {qTotal}</p>
         {/* Progreso como barra limpia */}
-        <div className="mx-auto mt-2 h-1.5 max-w-xs overflow-hidden rounded-full" style={{ background: 'var(--line)' }}>
+        <div
+          className="mx-auto mt-2 h-1.5 max-w-xs overflow-hidden rounded-full"
+          style={{ background: 'var(--line)' }}
+          role="progressbar"
+          aria-label="Progreso del cuestionario"
+          aria-valuemin={1}
+          aria-valuemax={qTotal}
+          aria-valuenow={qNumber}
+        >
           <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(qNumber / qTotal) * 100}%`, background: 'var(--teal)' }} />
         </div>
       </div>
@@ -849,8 +894,8 @@ function SchoolQuizScreen({ question, qNumber, qTotal, timerSeconds, noLimit, mo
       {!noLimit && !feedback && (
         <div className={`rounded-xl px-4 py-3 ${danger ? 'animate-timer-danger' : ''}`} style={{ background: danger ? 'var(--coral-soft)' : 'var(--card)', border: `1px solid ${danger ? 'var(--coral)' : 'var(--line)'}` }}>
           <div className="flex items-center justify-between text-sm font-extrabold">
-            <span style={{ color: danger ? 'var(--coral)' : 'var(--ink)' }}>{left}s</span>
-            <span style={{ color: danger ? 'var(--coral)' : 'var(--ink-faint)' }}>{danger ? '¡Corre!' : 'Tú puedes'}</span>
+            <span className="tabular-nums" style={{ color: danger ? 'var(--coral)' : 'var(--ink)' }}>{left}s</span>
+            <span style={{ color: danger ? 'var(--coral)' : 'var(--ink-soft)' }}>{danger ? '¡Corre!' : 'Tú puedes'}</span>
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full" style={{ background: 'var(--line)' }}>
             <div
@@ -876,11 +921,11 @@ function SchoolQuizScreen({ question, qNumber, qTotal, timerSeconds, noLimit, mo
                 key={idx}
                 onClick={() => optionClick(idx)}
                 className="group w-full rounded-xl px-4 py-3.5 text-left font-bold transition-soft hover:translate-y-[-1px]"
-                style={{ background: 'var(--paper)', border: '2px solid var(--line)', color: 'var(--ink)' }}
+                style={{ background: 'var(--paper)', border: '1px solid var(--line)', color: 'var(--ink)' }}
               >
                 <span
-                  className="mr-3 inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-extrabold text-white transition-soft group-hover:scale-110"
-                  style={{ background: 'var(--ink-faint)' }}
+                  className="mr-3 inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-extrabold transition-soft"
+                  style={{ background: 'var(--ink)', color: 'var(--paper)' }}
                 >
                   {optLetters[idx]}
                 </span>
@@ -892,8 +937,9 @@ function SchoolQuizScreen({ question, qNumber, qTotal, timerSeconds, noLimit, mo
 
         {mode === 'written' && !feedback && (
           <div className="mt-4">
-            <label className="block text-sm font-extrabold" style={{ color: 'var(--ink)' }}>Tu respuesta</label>
+            <label htmlFor="guess" className="block text-sm font-bold" style={{ color: 'var(--ink)' }}>Tu respuesta</label>
             <input
+              id="guess"
               value={guess}
               onChange={(e) => setGuess(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') submitWritten() }}
@@ -901,16 +947,18 @@ function SchoolQuizScreen({ question, qNumber, qTotal, timerSeconds, noLimit, mo
               maxLength={80}
               autoFocus
               className="mt-1.5 w-full rounded-xl px-4 py-3 text-base font-semibold transition-soft"
-              style={{ background: 'var(--paper)', border: '2px solid var(--line)', color: 'var(--ink)' }}
+              style={{ background: 'var(--paper)', border: '1px solid var(--line)', color: 'var(--ink)' }}
             />
             <div className="mt-4">
-              <Button variant="primary" disabled={!guess.trim()} onClick={submitWritten}>Responder →</Button>
+              <Button variant="primary" disabled={!guess.trim()} onClick={submitWritten}>Responder</Button>
             </div>
           </div>
         )}
 
         {feedback && (
           <div
+            role="status"
+            aria-live="polite"
             className="animate-fade-up mt-4 rounded-xl p-5 text-center"
             style={{
               background: feedback.isCorrect ? 'var(--leaf-soft)' : 'var(--coral-soft)',
@@ -919,7 +967,7 @@ function SchoolQuizScreen({ question, qNumber, qTotal, timerSeconds, noLimit, mo
           >
             {feedback.timedOut ? (
               <>
-                <div className="text-4xl">⏰</div>
+                <ClockIcon className="mx-auto h-10 w-10" />
                 <div className="mt-2 text-xl font-extrabold" style={{ color: 'var(--ink)' }}>Tiempo agotado</div>
                 <div className="mt-1 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
                   Era: <b style={{ color: 'var(--ink)' }}>{question.options[question.answer]}</b>
@@ -927,12 +975,16 @@ function SchoolQuizScreen({ question, qNumber, qTotal, timerSeconds, noLimit, mo
               </>
             ) : feedback.isCorrect ? (
               <>
-                <div className="animate-score-pop text-4xl">✓</div>
+                <div className="animate-score-pop" style={{ color: 'var(--leaf)' }}>
+                  <CheckIcon className="mx-auto h-10 w-10" />
+                </div>
                 <div className="mt-2 text-xl font-extrabold" style={{ color: 'var(--leaf)' }}>¡Correcto! +1 punto</div>
               </>
             ) : (
               <>
-                <div className="text-4xl">✗</div>
+                <div style={{ color: 'var(--coral)' }}>
+                  <CrossIcon className="mx-auto h-10 w-10" />
+                </div>
                 <div className="mt-2 text-xl font-extrabold" style={{ color: 'var(--ink)' }}>Era: {question.options[question.answer]}</div>
                 {mode === 'written' && (
                   <div className="mt-1 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>Dijiste: "{feedback.guessVal}"</div>
@@ -941,7 +993,7 @@ function SchoolQuizScreen({ question, qNumber, qTotal, timerSeconds, noLimit, mo
             )}
             <div className="mt-4">
               <Button variant={feedback.isCorrect ? 'primary' : 'secondary'} onClick={() => onAnswer(feedback)}>
-                {qNumber === qTotal ? 'Ver resultado' : 'Siguiente →'}
+                {qNumber === qTotal ? 'Ver resultado' : 'Siguiente'}
               </Button>
             </div>
           </div>
@@ -962,12 +1014,12 @@ function SchoolResultsScreen({ score, total, detail, sectionName, subjectName, m
         <div className="text-5xl select-none">{emoji}</div>
         <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight" style={{ color: 'var(--ink)' }}>{msg}</h2>
         <p className="mt-1.5 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
-          {sectionName} · {subjectName} · {mode === 'options' ? 'Opción múltiple' : 'Escribir'}
+          {sectionName}, {subjectName}, {mode === 'options' ? 'opción múltiple' : 'respuesta escrita'}
         </p>
       </div>
 
-      <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--teal-soft)', border: '2px solid var(--teal)' }}>
-        <div className="animate-score-pop text-5xl font-extrabold" style={{ color: 'var(--teal)' }}>{score}/{total}</div>
+      <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--teal-soft)', border: '1px solid var(--teal)' }}>
+        <div className="animate-score-pop text-5xl font-extrabold tabular-nums" style={{ color: 'var(--teal)' }}>{score}/{total}</div>
         <div className="mt-1 text-base font-bold" style={{ color: 'var(--ink-soft)' }}>{pct}% correcto</div>
       </div>
 
@@ -989,7 +1041,7 @@ function SchoolResultsScreen({ score, total, detail, sectionName, subjectName, m
       </div>
 
       <div>
-        <Eyebrow>Revisión</Eyebrow>
+        <h3 className="text-base font-extrabold" style={{ color: 'var(--ink)' }}>Revisión</h3>
         <div className="mt-3 grid gap-2 lg:grid-cols-2">
           {detail.map((d, i) => (
             <div
@@ -1004,13 +1056,18 @@ function SchoolResultsScreen({ score, total, detail, sectionName, subjectName, m
                 <span className="text-sm font-bold" style={{ color: 'var(--ink)' }}>
                   {i + 1}. {d.questionText}
                 </span>
-                <span className="shrink-0 text-sm font-extrabold" style={{ color: d.isCorrect ? 'var(--leaf)' : 'var(--coral)' }}>
-                  {d.isCorrect ? '✓' : d.timedOut ? '⏰' : '✗'}
+                <span className="shrink-0" style={{ color: d.isCorrect ? 'var(--leaf)' : 'var(--coral)' }}>
+                  {d.isCorrect
+                    ? <CheckIcon className="h-4 w-4" />
+                    : d.timedOut
+                      ? <ClockIcon className="h-4 w-4" />
+                      : <CrossIcon className="h-4 w-4" />}
+                  <span className="sr-only">{d.isCorrect ? 'Correcto' : d.timedOut ? 'Se acabó el tiempo' : 'Incorrecto'}</span>
                 </span>
               </div>
               {!d.isCorrect && (
                 <div className="mt-1 text-xs font-semibold" style={{ color: 'var(--ink-soft)' }}>
-                  Dijiste: "{d.guessVal || '—'}" · Correcta: "{d.correctAnswer}"
+                  Dijiste: "{d.guessVal || '—'}". Correcta: "{d.correctAnswer}".
                 </div>
               )}
             </div>
@@ -1051,7 +1108,7 @@ export default function App() {
   }, [dark])
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo(0, 0)
   }, [phase])
 
   const resetGame = (newConfig) => {
@@ -1152,34 +1209,35 @@ export default function App() {
       {/* Toggle tema: minimalista */}
       <button
         onClick={() => setDark(!dark)}
-        aria-label="Cambiar tema"
-        className="fixed top-4 right-4 z-50 flex h-10 w-10 items-center justify-center rounded-full text-lg transition-soft hover:scale-110"
-        style={{ background: 'var(--card)', border: '1px solid var(--line)', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
+        aria-label={dark ? 'Activar tema claro' : 'Activar tema oscuro'}
+        aria-pressed={dark}
+        className="fixed top-4 right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full text-lg transition-soft hover:scale-105"
+        style={{ background: 'var(--card)', border: '1px solid var(--line)', boxShadow: '0 1px 3px rgba(45,42,38,0.12)' }}
       >
-        {dark ? '☀️' : '🌙'}
+        <span aria-hidden="true">{dark ? '☀️' : '🌙'}</span>
       </button>
 
       <main className="mx-auto w-full max-w-xl px-5 pt-6 pb-10 sm:max-w-2xl sm:px-8 sm:pt-10 lg:max-w-5xl">
         {/* Breadcrumb: sutil */}
         {phase !== 'home' && (
-          <nav className="mb-6 flex items-center gap-1.5 text-[0.7rem] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-faint)' }}>
+          <nav aria-label="Pasos de la partida" className="mb-6 flex flex-wrap items-center gap-1.5 pr-12 text-xs font-bold" style={{ color: 'var(--ink-faint)' }}>
             {phase.startsWith('school') ? (
               <>
-                <span style={{ color: phase === 'school-config' ? 'var(--ink)' : undefined }}>Nivel</span>
-                <span>›</span>
-                <span style={{ color: phase === 'school-quiz' ? 'var(--ink)' : undefined }}>Preguntas</span>
-                <span>›</span>
-                <span style={{ color: phase === 'school-results' ? 'var(--ink)' : undefined }}>Resultado</span>
+                <span aria-current={phase === 'school-config' ? 'step' : undefined} style={{ color: phase === 'school-config' ? 'var(--ink)' : undefined }}>Nivel</span>
+                <span aria-hidden="true">›</span>
+                <span aria-current={phase === 'school-quiz' ? 'step' : undefined} style={{ color: phase === 'school-quiz' ? 'var(--ink)' : undefined }}>Preguntas</span>
+                <span aria-hidden="true">›</span>
+                <span aria-current={phase === 'school-results' ? 'step' : undefined} style={{ color: phase === 'school-results' ? 'var(--ink)' : undefined }}>Resultado</span>
               </>
             ) : (
               <>
-                <span style={{ color: phase === 'setup' ? 'var(--ink)' : undefined }}>Config</span>
-                <span>›</span>
-                <span style={{ color: phase === 'create' || phase === 'sudden-create' ? 'var(--ink)' : undefined }}>Preguntan</span>
-                <span>›</span>
-                <span style={{ color: phase === 'answer' ? 'var(--ink)' : undefined }}>Adivinan</span>
-                <span>›</span>
-                <span style={{ color: phase === 'results' ? 'var(--ink)' : undefined }}>Resultado</span>
+                <span aria-current={phase === 'setup' ? 'step' : undefined} style={{ color: phase === 'setup' ? 'var(--ink)' : undefined }}>Configuración</span>
+                <span aria-hidden="true">›</span>
+                <span aria-current={phase === 'create' || phase === 'sudden-create' ? 'step' : undefined} style={{ color: phase === 'create' || phase === 'sudden-create' ? 'var(--ink)' : undefined }}>Preguntan</span>
+                <span aria-hidden="true">›</span>
+                <span aria-current={phase === 'answer' ? 'step' : undefined} style={{ color: phase === 'answer' ? 'var(--ink)' : undefined }}>Adivinan</span>
+                <span aria-hidden="true">›</span>
+                <span aria-current={phase === 'results' ? 'step' : undefined} style={{ color: phase === 'results' ? 'var(--ink)' : undefined }}>Resultado</span>
               </>
             )}
           </nav>
@@ -1197,7 +1255,6 @@ export default function App() {
             current={createIdx + 1}
             total={totalToCreate}
             roundLabel={`Ronda ${Math.floor(createIdx / 2) + 1} de ${config.rounds}`}
-            isSudden={false}
             onSave={handleSaveQuestion}
           />
         )}
@@ -1210,7 +1267,6 @@ export default function App() {
             current={suddenCreateIdx + 1}
             total={2}
             roundLabel={`Muerte súbita ${suddenRounds}`}
-            isSudden
             onSave={handleSuddenSave}
           />
         )}
@@ -1269,7 +1325,7 @@ export default function App() {
         )}
 
         <footer className="mt-12 pb-4 text-center text-xs font-semibold" style={{ color: 'var(--ink-faint)' }}>
-          Friend or Fake · Hecho para amigos 🎭
+          Friend or Fake, hecho para amigos <span aria-hidden="true">🎭</span>
         </footer>
       </main>
     </div>
